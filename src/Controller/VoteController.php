@@ -11,7 +11,9 @@ use App\Entity\Ticket;
 use App\Entity\User;
 use App\Entity\Vote;
 use App\Library\VoteStatus;
+use App\Service\SMService;
 use App\Service\VoteManagerService;
+use mysql_xdevapi\Session;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,9 +47,44 @@ class VoteController extends AbstractController
     }
 
     /**
-     * @Route("/authorize", methods="POST")
+     * @Route("/send", methods="POST")
      */
-    public function authorize(Request $request) {
+    public function send(Request $request, SMService $service) {
+        if(!$request->request->has("name") || !$request->request->has("phone"))
+            return $this->response("Invalid request.", 400);
+        $user = $this->getDoctrine()->getRepository(User::class)->findOneBy([
+            "name" => $request->request->get("name"),
+            "phone" => $request->request->get("phone")
+        ]);
+        if (is_null($user))
+            return $this->response("User not found.", 404);
+        $service->sendCode($user);
+        return $this->response("Sent successfully.");
+    }
+
+    /**
+     * @Route("/login", methods="POST")
+     */
+    public function authorize(Request $request, SMService $service) {
+        if(!$request->request->has("name") || !$request->request->has("phone") || !$request->request->has("code"))
+            return $this->response("Invalid request.", 400);
+        $session = $request->getSession();
+        if (!$session)
+            $session = new Session();
+        $session->start();
+
+        /** @var User $user */
+        $user = $this->getDoctrine()->getRepository(User::class)->findOneBy([
+            "name" => $request->request->get("name"),
+            "phone" => $request->request->get("phone")
+        ]);
+
+        if($service->verifyCode($user, $request->request->get("code"))) {
+            $session->set("phone", $user->getPhone());
+            return $this->response(null);
+        } else {
+            return $this->response("Incorrect code.", 400);
+        }
 
     }
 
