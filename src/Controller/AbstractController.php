@@ -33,7 +33,10 @@ class AbstractController extends \Symfony\Bundle\FrameworkBundle\Controller\Abst
     }
 
     public function response($data, $code = 200) {
-
+        return JsonResponse::create([
+            "code" => $code,
+            "data" => $data
+        ], $code);
     }
 
     /**

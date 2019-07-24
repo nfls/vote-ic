@@ -1,5 +1,6 @@
 <?php
 namespace App\Entity;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\Uuid;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -7,7 +8,7 @@ use Symfony\Component\Validator\Constraints\DateTime;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\TicketRepository")
  */
-class Ticket
+class Ticket implements \JsonSerializable
 {
     /**
      * @var Uuid
@@ -30,9 +31,10 @@ class Ticket
      */
     private $user;
     /**
-     * @var array
+     * @var ArrayCollection
      *
-     * @ORM\Column(type="json")
+     * @ORM\ManyToMany(targetEntity="Choice")
+     * @ORM\JoinTable(name="ticket_choices")
      */
     private $choices;
     /**
@@ -56,6 +58,12 @@ class Ticket
     /**
      * @var string
      *
+     * @ORM\Column(type="json")
+     */
+    private $other;
+    /**
+     * @var string
+     *
      * @ORM\Column(type="text")
      */
     private $code;
@@ -64,31 +72,48 @@ class Ticket
      */
     private $time;
 
-    public function  __construct(Vote $vote, User $user, $choices, string $ip, string $userAgent, string $deviceId)
+    public function  __construct(Vote $vote, User $user, $input, string $ip, string $userAgent, string $deviceId, array $other)
     {
-        if(!is_array($choices) || count($vote->getOptions()) != count($choices))
-            throw new \InvalidArgumentException("Invalid ticket.");
-        for($i=0; $i<count($vote->getOptions()); $i++) {
-            if(!is_int($choices[$i]) || $choices[$i] < 0 || $choices[$i] >= count($vote->getOptions()[$i]["options"]))
-                throw new \InvalidArgumentException("Invalid ticket for ".$i.".");
+        if(!is_array($input))
+            throw new \InvalidArgumentException("Invalid input.");
+
+        $choices = [];
+
+        foreach($vote->getSections() as $section) {
+            /** @var $section Section */
+            if (!array_key_exists($section->getId(), $input))
+                throw new \InvalidArgumentException("Invalid input.");
+            $choiceId = $input[$section->getId()];
+            if (is_null($choiceId))
+                throw new \InvalidArgumentException("Invalid input.");
+            $userChoice = array_filter($section->getChoices()->toArray(), function($choice) use($choiceId) {
+                /** @var $choice Choice */
+                return $choice->getId() == $choiceId;
+            });
+            if (count($userChoice) != 1)
+                throw new \InvalidArgumentException("Invalid input.");
+            array_push($choices, $userChoice[0]);
         }
+
         $this->vote = $vote;
-        $this->user = $user;
+        // $this->user = $user;
         $this->choices = $choices;
         $this->code = bin2hex(random_bytes(32));
         $this->time = new \DateTime();
         $this->ip = $ip;
         $this->userAgent = $userAgent;
         $this->deviceId = $deviceId;
+        $this->other = $other;
     }
+
     public function getId()
     {
         return $this->id;
     }
     /**
-     * @return array
+     * @return ArrayCollection
      */
-    public function getChoices(): array
+    public function getChoices()
     {
         return $this->choices;
     }
@@ -98,5 +123,13 @@ class Ticket
     public function getCode(): string
     {
         return $this->code;
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            "choices" => $this->getChoices()->toArray(),
+            "code" => $this->getCode()
+        ];
     }
 }

@@ -75,16 +75,24 @@ class VoteController extends AbstractController
 
         if(!is_null($em->getRepository(Ticket::class)->findOneByUserAndVote($this->getUser(), $vote)))
             return $this->response("You have already voted.", Response::HTTP_FORBIDDEN);
-        try {
+        //try {
             // if(!$passwordEncoder->isPasswordValid($this->getUser(), $request->request->get("password"))) {
             //    return $this->response()->response($translator->trans("incorrect-password"), Response::HTTP_BAD_REQUEST);
             //} // TODO: SMS Verification.
 
-            if(!$request->request->has("clientId")) {
+            if(!$request->request->has("deviceId") || !$request->request->has("other")) {
                 return $this->response("Invalid client.",Response::HTTP_BAD_REQUEST);
             }
 
-            $ticket = new Ticket($vote, $this->getUser(), $request->request->get("choices"), ($request->headers->get("X-Forwarded-For") ?? "") . "|" . $request->getClientIp() , $request->headers->get("user-agent"), $request->request->get("clientId") ?? "");
+            $ticket = new Ticket(
+                $vote,
+                $this->getUser(),
+                $request->request->get("choices"),
+                ($request->headers->get("X-Forwarded-For") ?? "") . "|" . $request->getClientIp() ,
+                $request->headers->get("user-agent"),
+                $request->request->get("deviceId"),
+                $request->request->get("other"));
+
             $em->persist($ticket);
             $em->flush();
 
@@ -99,12 +107,13 @@ class VoteController extends AbstractController
                 "user" => $this->getUser()->getInfoArray()
             ]);
             file_put_contents("/var/log/vote.log", $info, FILE_APPEND);
-            */
             $this->writeLog("UserVoted", json_encode($request->request->get("choices")));
-            return $this->response()->responseEntity($ticket, Response::HTTP_OK);
-        } catch(\Exception $e) {
-            return $this->response()->response($translator->trans("invalid-ticket"), Response::HTTP_BAD_REQUEST);
-        }
+            */
+
+            return $this->responseEntity($ticket, Response::HTTP_OK);
+       // } catch(\Exception $e) {
+        //    return $this->response($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        //}
     }
 
     /**
@@ -113,7 +122,7 @@ class VoteController extends AbstractController
     public function result(Request $request) {
 
         $this->denyAccessUnlessGranted(Permission::IS_ADMIN);
-        $id = $request->query->get("id");
+        $id = $request->request->get("id");
         if($id == 'new')
             return $this->response()->response(null);
         $em = $this->getDoctrine()->getManager();
