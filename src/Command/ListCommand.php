@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Vote;
+use App\Library\VoteStatus;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,11 +24,11 @@ class ListCommand extends AbstractVoteCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
-        $votes = $this->voteManagerService->list();
+        $votes = $this->voteManagerService->listAll();
 
-        $io->table(["id", "title", "enabled"], array_map(function($vote) {
+        $io->table(["id", "title", "status"], array_map(function($vote) {
             /** @var $vote Vote */
-            return [$vote->getId()->toString(), $vote->getTitle(), $vote->isEnabled()? "true": "false"];
+            return [$vote->getId()->toString(), $vote->getTitle(), VoteStatus::getDescription($vote->getStatus())];
         }, $votes));
 
         $io->success('All votes listed.');

@@ -38,6 +38,11 @@ class User
     /**
      * @ORM\Column(type="text")
      */
+    private $name;
+
+    /**
+     * @ORM\Column(type="text")
+     */
     private $identifier;
 
     /**
@@ -57,6 +62,16 @@ class User
     public function getRole(): int
     {
         return $this->role;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getPhone(): string
+    {
+        return $this->phone;
     }
 
     static function getAnonymousUser() {

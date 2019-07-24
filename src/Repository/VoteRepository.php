@@ -1,6 +1,7 @@
 <?php
 namespace App\Repository;
 use App\Entity\Vote;
+use App\Library\VoteStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 /**
@@ -15,7 +16,12 @@ class VoteRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Vote::class);
     }
-    public function findByEnabled(bool $enabled) {
-        return $this->findBy(["enabled"=>$enabled],["time"=>"desc"]);
+
+    public function findEnabled() {
+        $qb = $this->createQueryBuilder("u");
+        return $qb
+            ->where($qb->expr()->in("u.status", [VoteStatus::PREVIEWING, VoteStatus::VOTING, VoteStatus::RESULTS_RELEASED]))
+            ->getQuery()
+            ->getResult();
     }
 }

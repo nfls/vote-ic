@@ -12,6 +12,7 @@ namespace App\Service;
 use App\Entity\Choice;
 use App\Entity\Section;
 use App\Entity\Vote;
+use App\Library\VoteStatus;
 use Doctrine\Common\Persistence\ObjectManager;
 
 class VoteManagerService
@@ -52,9 +53,13 @@ class VoteManagerService
         return $vote->getId()->toString();
     }
 
-    public function set(string $id, bool $isEnabled) {
+    public function set(string $id, int $status) {
+        $current = $this->findCurrent();
+        if (!is_null($current) && $status != VoteStatus::HIDDEN && $current->getId()->toString() != $id) {
+            throw new \InvalidArgumentException("You can only show one vote at once.");
+        }
         $vote = $this->retrieve($id);
-        $vote->setEnabled($isEnabled);
+        $vote->setStatus($status);
         $this->objectManager->persist($vote);
         $this->objectManager->flush();
         return true;
@@ -67,8 +72,18 @@ class VoteManagerService
         return $vote;
     }
 
-    public function list() {
+    public function listAll() {
         $votes = $this->objectManager->getRepository(Vote::class)->findAll();
         return $votes;
     }
+
+    public function findCurrent(): ?Vote {
+        $votes = $this->objectManager->getRepository(Vote::class)->findEnabled();
+        if(count($votes) == 1)
+            return $votes[0];
+        else
+            return null;
+    }
+
+
 }

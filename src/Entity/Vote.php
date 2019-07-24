@@ -1,5 +1,6 @@
 <?php
 namespace App\Entity;
+use App\Library\VoteStatus;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\Uuid;
@@ -38,11 +39,14 @@ class Vote implements \JsonSerializable
     private $sections;
 
     /**
-     * @var boolean
+     * @var int
      *
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="integer")
      */
-    private $enabled = false;
+    private $status = VoteStatus::HIDDEN;
+
+    const CRAFT = 0;
+
 
     public function __construct()
     {
@@ -81,19 +85,21 @@ class Vote implements \JsonSerializable
     {
         $this->content = $content;
     }
+
     /**
-     * @return bool
+     * @return int
      */
-    public function isEnabled(): bool
+    public function getStatus(): int
     {
-        return $this->enabled;
+        return $this->status;
     }
+
     /**
-     * @param bool $enabled
+     * @param int $status
      */
-    public function setEnabled(bool $enabled): void
+    public function setStatus(int $status): void
     {
-        $this->enabled = $enabled;
+        $this->status = $status;
     }
 
     public function addSection(Section $section) {
@@ -115,7 +121,7 @@ class Vote implements \JsonSerializable
             "title" => $this->getTitle(),
             "content" => $this->getContent(),
             "sections" => $this->getSections()->toArray(),
-            "enabled" => $this->isEnabled()
+            "status" => $this->getStatus()
         ];
     }
 }

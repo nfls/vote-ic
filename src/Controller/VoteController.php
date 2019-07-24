@@ -10,6 +10,7 @@ use App\Controller\AbstractController;
 use App\Entity\Ticket;
 use App\Entity\User;
 use App\Entity\Vote;
+use App\Library\VoteStatus;
 use App\Service\VoteManagerService;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -18,11 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Encoder\PasswordEncoderInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Translation\TranslatorInterface;
-/**
- * Class VoteController
- * @deprecated No longer used.
- */
-// Ctrl + Slash to recover
+
 class VoteController extends AbstractController
 {
     /**
@@ -31,15 +28,20 @@ class VoteController extends AbstractController
     public function index() {
         return $this->render("base.html.twig");
     }
+
     /**
      * @Route("/current", methods="GET")
      */
     public function current() {
-        return $this->responseEntity($this
+        $votes = $this
             ->getDoctrine()
             ->getManager()
             ->getRepository(Vote::class)
-            ->findOneBy(["enabled" => true]));
+            ->findEnabled();
+        if(count($votes) == 1)
+            return $this->responseEntity($votes[0]);
+        else
+            return $this->response(null, 404);
     }
 
     /**
@@ -59,23 +61,23 @@ class VoteController extends AbstractController
     /**
      * @Route("/submit", methods="POST")
      */
-    public function vote(Request $request) {
+    public function vote(Request $request, VoteManagerService $voteManagerService) {
         //$this->denyAccessUnlessGranted(Permission::IS_LOGIN);
 
         $id = $request->request->get("id");
         /** @var Vote $vote */
-        $vote = $this->getDoctrine()->getManager()->getRepository(Vote::class)->find($id); // Retrieve vote.
+        $vote = $voteManagerService->findCurrent();
 
-        if(is_null($vote))
+        if(is_null($vote) || $vote->getId()->toString() != $id)
             return $this->response("Your vote does not exist.", Response::HTTP_NOT_FOUND);
-        if(!$vote->isEnabled())
+        if($vote->getStatus() != VoteStatus::VOTING)
             return $this->response("Your vote does not exist.", Response::HTTP_UNAUTHORIZED);
 
         $em = $this->getDoctrine()->getManager(); // Check if the user has already voted.
 
         if(!is_null($em->getRepository(Ticket::class)->findOneByUserAndVote($this->getUser(), $vote)))
             return $this->response("You have already voted.", Response::HTTP_FORBIDDEN);
-        //try {
+        try {
             // if(!$passwordEncoder->isPasswordValid($this->getUser(), $request->request->get("password"))) {
             //    return $this->response()->response($translator->trans("incorrect-password"), Response::HTTP_BAD_REQUEST);
             //} // TODO: SMS Verification.
@@ -111,9 +113,9 @@ class VoteController extends AbstractController
             */
 
             return $this->responseEntity($ticket, Response::HTTP_OK);
-       // } catch(\Exception $e) {
-        //    return $this->response($e->getMessage(), Response::HTTP_BAD_REQUEST);
-        //}
+        } catch(\Exception $e) {
+           return $this->response($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
     }
 
     /**

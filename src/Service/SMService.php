@@ -9,13 +9,17 @@
 namespace App\Service;
 
 
+use App\Entity\User;
+use Symfony\Component\Cache\Adapter\RedisAdapter;
+
 class SMService
 {
-    private $client;
+    private $celery;
+    private $redis;
 
     public function __construct()
     {
-        $this->client = new \Celery(
+        $this->celery = new \Celery(
             "localhost",
             "",
             "",
@@ -25,9 +29,31 @@ class SMService
             6379,
             'redis'
         );
+
+        $this->redis = RedisAdapter::createConnection('redis://localhost');
     }
 
-    public function send(?string $receiver, string $template, array $params) {
+    public function sendCode(User $user) {
+        $code = $this->getRandomCode();
+        if($this->send($user->getPhone(), "", ["code" => $code])) { //TODO: Add template.
+            $this->redis->set($this->getKey($user), $code);
+            $this->redis->expire($this->getKey($user), 180);
+        } else {
+
+        }
+
+
+    }
+
+    public function verifyCode(User $user, string $code) {
+
+    }
+
+    private function getKey(User $user) {
+        return "vote".$user->getPhone();
+    }
+
+    private function send(?string $receiver, string $template, array $params) {
         if(is_null($receiver))
             return false;
         if(!preg_match('`^((13[0-9])|(14[5,7])|(15[0-3,5-9])|(17[0,3,5-8])|(18[0-9])|166|198|199|(147))\d{8}$`m', $receiver))
@@ -39,9 +65,8 @@ class SMService
             return false;
         }
     }
-    public function bulk(array $receivers, string $template, array $params) {
-        foreach($receivers as $receiver) {
-            $this->send($receiver, $template, $params);
-        }
+
+    private function getRandomCode() {
+        return (string)mt_rand(100000, 999999);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Command;
 
+use App\Entity\Vote;
+use App\Library\VoteStatus;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\Input;
 use Symfony\Component\Console\Input\InputArgument;
@@ -10,16 +12,15 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class EnableCommand extends AbstractVoteCommand
+class SetCommand extends AbstractVoteCommand
 {
-    protected static $defaultName = 'app:enable';
+    protected static $defaultName = 'app:set';
 
     protected function configure()
     {
         $this
-            ->setDescription('Enable or disable a vote.')
+            ->setDescription('Set status for a vote.')
             ->addArgument('id', InputArgument::REQUIRED, 'The id for the vote.')
-            ->addArgument("status", InputArgument::REQUIRED, 'Status, either enabled or disabled.')
         ;
     }
 
@@ -27,11 +28,16 @@ class EnableCommand extends AbstractVoteCommand
     {
         $io = new SymfonyStyle($input, $output);
         $id = $input->getArgument('id');
-        $status = $input->getArgument('status') == "enabled";
 
-        $this->voteManagerService->set($id, $status);
+        $status = $io->choice("Please specify the status:", [
+            VoteStatus::getDescription(VoteStatus::HIDDEN),
+            VoteStatus::getDescription(VoteStatus::PREVIEWING),
+            VoteStatus::getDescription(VoteStatus::VOTING),
+            VoteStatus::getDescription(VoteStatus::RESULTS_RELEASED)
+            ]);
 
-        $io->success(("You have successfully set $id to " .($status? "enabled":"disabled")));
-        $io->note("Please make sure that no more than one vote is enabled.");
+        $this->voteManagerService->set($id, VoteStatus::getValue($status));
+
+        $io->success(("You have successfully set $id to " . $status));
     }
 }
