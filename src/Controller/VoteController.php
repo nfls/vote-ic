@@ -190,7 +190,7 @@ class VoteController extends AbstractController
     public function result(Request $request, VoteManagerService $voteManagerService) {
         $this->denyAccessUnlessGranted(User::ROLE_USER);
 
-        $id = $request->request->get("id");
+        $id = $request->query->get("id");
         /** @var Vote $vote */
         $vote = $voteManagerService->findCurrent();
 
@@ -199,12 +199,12 @@ class VoteController extends AbstractController
         if($vote->getStatus() != VoteStatus::RESULTS_RELEASED)
             return $this->response("Your vote does not exist.", Response::HTTP_UNAUTHORIZED);
 
-        $em = $this->getDoctrine()->getManager();
+        if($vote->getStatus() == VoteStatus::RESULTS_RELEASED) {
+            $result = $voteManagerService->result($id, false);
+            return $this->response($result);
+        } else {
+            return $this->response(null);
+        }
 
-        $tickets = $em->getRepository(Ticket::class)->findBy(["vote" => $vote]);
-
-
-
-        return $this->response()->response(array("total" => count($tickets), "detail" => $result));
     }
 }
