@@ -195,7 +195,7 @@
                     this.load()
                     this.user = response.data["data"]
                 }).catch((err) => {
-                    this.dialogMobile = true;
+                    this.control.showLoginDialog = true;
                 })
             },
             sendCode() {
