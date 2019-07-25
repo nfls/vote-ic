@@ -94,7 +94,7 @@ class SMService
     }
 
     private function getKey(User $user) {
-        return "vote".$user->getPhone();
+        return "vote.".$user->getPhone();
     }
 
     private function getRateKey(User $user) {

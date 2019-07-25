@@ -15,6 +15,7 @@ use App\Service\SMService;
 use App\Service\VoteManagerService;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -97,7 +98,7 @@ class VoteController extends AbstractController
             return $this->response("Expired. Please send the code again.", 403);
         else if($result) {
             $session->set("phone", $user->getPhone());
-            return $this->response(null);
+            $response = $this->response(null);
         } else {
             return $this->response("Incorrect code.", 400);
         }

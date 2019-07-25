@@ -14,3 +14,4 @@ var
 # Nodejs folder
 
 node_modules
+public/build/app.js

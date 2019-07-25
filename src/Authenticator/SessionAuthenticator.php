@@ -64,7 +64,7 @@ class SessionAuthenticator extends AbstractGuardAuthenticator
      */
     public function supports(Request $request)
     {
-        return $request->getSession()->has("token");
+        return $request->getSession()->has("phone");
     }
 
     /**
@@ -92,7 +92,7 @@ class SessionAuthenticator extends AbstractGuardAuthenticator
      */
     public function getCredentials(Request $request)
     {
-        return $request->getSession()->get("token");
+        return $request->getSession()->get("phone");
     }
 
     /**
