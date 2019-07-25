@@ -61,13 +61,21 @@ class VoteController extends AbstractController
     public function send(Request $request, SMService $service) {
         if(!$request->request->has("name") || !$request->request->has("phone"))
             return $this->response("Invalid request.", 400);
-        $user = $this->getDoctrine()->getRepository(User::class)->findOneBy([
-            "name" => $request->request->get("name"),
-            "phone" => $request->request->get("phone")
-        ]);
+        if ($request->request->has("confirm")) {
+            $this->denyAccessUnlessGranted(User::ROLE_USER);
+            $user = $this->getUser();
+            $action = "confirm";
+        } else {
+            $user = $this->getDoctrine()->getRepository(User::class)->findOneBy([
+                "name" => $request->request->get("name"),
+                "phone" => $request->request->get("phone")
+            ]);
+            $action = "login";
+        }
+
         if (is_null($user))
             return $this->response("User not found.", 404);
-        $result = $service->sendCode($user, $request->getClientIp());
+        $result = $service->sendCode($user, $request->getClientIp(), $action);
         if (is_null($result))
             return $this->response("Your rate has hit the limit. Try again 60 seconds later.", 403);
         else if ($result)
@@ -93,12 +101,12 @@ class VoteController extends AbstractController
             "phone" => $request->request->get("phone")
         ]);
 
-        $result = $service->verifyCode($user, $request->request->get("code"));
+        $result = $service->verifyCode($user, $request->request->get("code"), "login");
         if(is_null($result))
             return $this->response("Expired. Please send the code again.", 403);
         else if($result) {
             $session->set("phone", $user->getPhone());
-            $response = $this->response(null);
+            return $this->response(null);
         } else {
             return $this->response("Incorrect code.", 400);
         }
@@ -134,7 +142,7 @@ class VoteController extends AbstractController
         if(!$request->request->has("code"))
             return $this->response("Please enter your code.", Response::HTTP_UNAUTHORIZED);
 
-        if(!$service->verifyCode($this->getUser(), $request->request->get("code")))
+        if(!$service->verifyCode($this->getUser(), $request->request->get("code"), "confirm"))
             return $this->response("Your code is not correct.", Response::HTTP_UNAUTHORIZED);
 
         if(!$request->request->has("deviceId") || !$request->request->has("other"))
@@ -168,8 +176,9 @@ class VoteController extends AbstractController
             */
 
             return $this->responseEntity($ticket, Response::HTTP_OK);
-        } catch(\Exception $e) {
-           return $this->response($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+        catch(\Exception $e) {
+            return $this->response($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
     }
 

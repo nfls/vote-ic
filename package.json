@@ -18,6 +18,8 @@
         "element-ui": "^2.9.2",
         "fingerprintjs2": "^2.1.0",
         "markdown-it": "^8.4.2",
+        "node-sass": "^4.12.0",
+        "sass-loader": "^7.0.1",
         "vue": "^2.6.10",
         "vue-axios": "^2.1.4",
         "vue-loader": "^15.7.0",

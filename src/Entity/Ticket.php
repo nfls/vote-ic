@@ -86,19 +86,19 @@ class Ticket implements \JsonSerializable
             $choiceId = $input[$section->getId()];
             if (is_null($choiceId))
                 throw new \InvalidArgumentException("Invalid input.");
-            $userChoice = array_filter($section->getChoices()->toArray(), function($choice) use($choiceId) {
+            $userChoice = array_values(array_filter($section->getChoices()->toArray(), function($choice) use($choiceId) {
                 /** @var $choice Choice */
                 return $choice->getId() == $choiceId;
-            });
+            }));
             if (count($userChoice) != 1)
                 throw new \InvalidArgumentException("Invalid input.");
             array_push($choices, $userChoice[0]);
         }
 
         $this->vote = $vote;
-        // $this->user = $user;
+        $this->user = $user;
         $this->choices = $choices;
-        $this->code = bin2hex(random_bytes(32));
+        $this->code = bin2hex(random_bytes(10));
         $this->time = new \DateTime();
         $this->ip = $ip;
         $this->userAgent = $userAgent;

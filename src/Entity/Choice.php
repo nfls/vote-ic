@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\Uuid;
 
@@ -28,6 +29,18 @@ class Choice implements \JsonSerializable
      * @ORM\JoinColumn(name="section_id", referencedColumnName="id")
      */
     private $section;
+
+//    /**
+//     * @var ArrayCollection
+//     *
+//     * @ORM\ManyToOne(targetEntity="User", inversedBy="candidates")
+//     */
+//    private $users;
+
+    public function __construct()
+    {
+        $this->users = new ArrayCollection();
+    }
 
     public function getId(): int
     {
@@ -65,6 +78,16 @@ class Choice implements \JsonSerializable
     {
         $this->section = $section;
     }
+
+//    public function addUser(User $user) {
+//        if(!$this->users->contains($user))
+//            $this->users->add($user);
+//    }
+//
+//    public function removeUser(User $user) {
+//        if($this->users->contains($user))
+//            $this->users->removeElement($user);
+//    }
 
     public function jsonSerialize()
     {

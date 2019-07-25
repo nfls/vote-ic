@@ -34,23 +34,23 @@ class SMService
         $this->redis = RedisAdapter::createConnection('redis://localhost');
     }
 
-    public function sendCode(User $user, string $ip) {
+    public function sendCode(User $user, string $ip, string $action) {
         if (!$this->canSend($user, $ip))
             return null;
         $code = $this->getRandomCode();
         if($this->send($user->getPhone(), "SMS_171187527", ["code_begin" => substr($code, 0, 3), "code_end" => substr($code, 3, 3)])) {
-            $this->redis->set($this->getKey($user), $code);
-            $this->redis->expire($this->getKey($user), 180);
+            $this->redis->set($this->getKey($user, $action), $code);
+            $this->redis->expire($this->getKey($user, $action), 180);
             return true;
         } else {
             return false;
         }
     }
 
-    public function verifyCode(User $user, string $code) {
-        if($this->redis->get($this->getKey($user)) == $code) {
+    public function verifyCode(User $user, string $code, string $action) {
+        if($this->redis->get($this->getKey($user, $action)) == $code) {
             $this->redis->del($this->getRateKey($user));
-            $this->redis->del($this->getKey($user));
+            $this->redis->del($this->getKey($user, $action));
             return true;
         } else {
             if($this->rate($user))
@@ -93,8 +93,8 @@ class SMService
         $this->send($user->getPhone(), "SMS_171192462", ["sn" => $ticket->getCode()]);
     }
 
-    private function getKey(User $user) {
-        return "vote.".$user->getPhone();
+    private function getKey(User $user, string $action) {
+        return "vote.".$action.".".$user->getPhone();
     }
 
     private function getRateKey(User $user) {

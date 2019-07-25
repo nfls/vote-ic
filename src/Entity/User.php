@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -18,7 +19,7 @@ class User implements UserInterface, \JsonSerializable
     {
         $this->phone = $phone;
         $this->identifier = $identifier;
-        $this->role = $role;
+        $this->candidates = new ArrayCollection();
     }
 
     /**
@@ -47,10 +48,19 @@ class User implements UserInterface, \JsonSerializable
      * @ORM\Column(type="boolean")
      */
 
-    private $admin;
+    private $admin = false;
     /**
      * @return int|null
      */
+
+    //**
+    // * If a user is a candidate in a vote.
+    // *
+    // * @ORM\ManyToMany(targetEntity="Choice", inversedBy="users")
+    // * @ORM\JoinTable(name="user_candidates")
+    // */
+    // private $candidates;
+
 
     public function getId(): ?int
     {
@@ -134,6 +144,22 @@ class User implements UserInterface, \JsonSerializable
     {
         return null;
     }
+
+    /*
+
+    public function addCandidate(Choice $choice) {
+        if(!$this->candidates->contains($choice))
+            $this->candidates->add($choice);
+        $choice->addUser($this);
+    }
+
+    public function removeCandidate(Choice $choice) {
+        if($this->candidates->contains($choice))
+            $this->candidates->removeElement($choice);
+        $choice->removeUser($this);
+    }
+
+    */
 
     public function jsonSerialize()
     {

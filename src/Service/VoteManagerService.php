@@ -11,6 +11,7 @@ namespace App\Service;
 
 use App\Entity\Choice;
 use App\Entity\Section;
+use App\Entity\User;
 use App\Entity\Vote;
 use App\Library\VoteStatus;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -27,8 +28,8 @@ class VoteManagerService
     /**
      * Array Structure:
      * [
-     *      "1. 主席": ["Leigh Smith", "Leigh Smith"],
-     *      "2. 代表": ["Walter Nagles", "Walter Nagles"]
+     *      "1. President": ["Leigh Smith", "Leigh Smith"],
+     *      "2. Cleaner": ["Walter Nagles", "Walter Nagles"]
      * ]
      */
     public function create(string $name, array $data) {
@@ -70,6 +71,26 @@ class VoteManagerService
         if (is_null($vote))
             throw new \Exception("Vote cannot be found");
         return $vote;
+    }
+
+    public function associate(string $user, string $id, bool $add = true) {
+        /** @var Choice $choice */
+        $choice = $this->objectManager->getRepository(Choice::class)->find($id);
+        /** @var User $user */
+        $user = $this->objectManager->getRepository(User::class)->find($user);
+        if (is_null($user))
+            $user = $this->objectManager->getRepository(User::class)->findOneBy(["name" => $user]);
+
+        if (is_null($choice))
+            throw new \InvalidArgumentException("Cannot find the choice.");
+
+        if (is_null($user))
+            throw new \InvalidArgumentException("Cannot find the user");
+
+        if ($add)
+            $user->addCandidate($choice);
+        else
+            $user->removeCandidate($choice);
     }
 
     public function listAll() {
