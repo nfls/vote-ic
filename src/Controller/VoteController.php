@@ -121,6 +121,7 @@ class VoteController extends AbstractController
 
     }
 
+
     /**
      * @Route("/submit", methods="POST")
      */
@@ -199,12 +200,41 @@ class VoteController extends AbstractController
         if($vote->getStatus() != VoteStatus::RESULTS_RELEASED)
             return $this->response("Your vote does not exist.", Response::HTTP_UNAUTHORIZED);
 
+
         if($vote->getStatus() == VoteStatus::RESULTS_RELEASED) {
             $result = $voteManagerService->result($id, false);
-            return $this->response($result);
+            $tickets = $this->getDoctrine()->getManager()->getRepository(Ticket::class)->findBy(["vote" => $vote]);
+            return $this->response([
+                "count" => count($tickets),
+                "data" => $result
+            ]);
         } else {
             return $this->response(null);
         }
+    }
 
+    /**
+     * @Route("/mine", methods="GET")
+     */
+    public function mine(Request $request, VoteManagerService $voteManagerService) {
+        $this->denyAccessUnlessGranted(User::ROLE_USER);
+        $id = $request->query->get("id");
+        /** @var Vote $vote */
+        $vote = $voteManagerService->findCurrent();
+
+        if(is_null($vote) || $vote->getId()->toString() != $id)
+            return $this->response("Your vote does not exist.", Response::HTTP_NOT_FOUND);
+        /** @var Choice $choice */
+        $choice = $this->getDoctrine()->getManager()->getRepository(Choice::class)->findOneByUserAndVote($this->getUser(), $vote);
+
+        if (!is_null($choice) && $vote->getStatus() == VoteStatus::RESULTS_RELEASED) {
+            $info = $choice->jsonSerialize();
+            $info["count"] = $choice->getCount();
+            $info["adjust"] = $choice->getAdjust();
+            $info["result"] = $choice->getResult();
+            return $this->response($info);
+        } else {
+            return $this->responseEntity($choice);
+        }
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Choice;
+use App\Entity\User;
+use App\Entity\Vote;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
@@ -19,5 +21,17 @@ class ChoiceRepository extends ServiceEntityRepository
         parent::__construct($registry, Choice::class);
     }
 
+    public function findOneByUserAndVote(User $user, Vote $vote) {
+        $qb = $this->createQueryBuilder("u");
+        return $qb->where(":user MEMBER OF u.users")
+            ->setParameter("user", $user)
+            ->join("u.section", "q")
+            ->andWhere("q.vote = :vote")
+            //->join("q.vote", "p")
+            //->andWhere("p.id = :id")
+            ->setParameter("vote", $vote)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 
 }
