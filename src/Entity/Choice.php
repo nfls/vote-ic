@@ -30,12 +30,25 @@ class Choice implements \JsonSerializable
      */
     private $section;
 
-//    /**
-//     * @var ArrayCollection
-//     *
-//     * @ORM\ManyToOne(targetEntity="User", inversedBy="candidates")
-//     */
-//    private $users;
+    /**
+     * @var int
+     * @ORM\Column(type="integer")
+     */
+    private $adjust = 0;
+
+    /**
+     * @var int
+     * @ORM\Column(type="integer")
+     */
+    private $count = 0;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\ManyToMany(targetEntity="User", inversedBy="candidates")
+     */
+    private $users;
+
 
     public function __construct()
     {
@@ -72,6 +85,14 @@ class Choice implements \JsonSerializable
     }
 
     /**
+     * @return int
+     */
+    public function getAdjust(): int
+    {
+        return $this->adjust;
+    }
+
+    /**
      * @param mixed $section
      */
     public function setSection($section): void
@@ -79,15 +100,31 @@ class Choice implements \JsonSerializable
         $this->section = $section;
     }
 
-//    public function addUser(User $user) {
-//        if(!$this->users->contains($user))
-//            $this->users->add($user);
-//    }
-//
-//    public function removeUser(User $user) {
-//        if($this->users->contains($user))
-//            $this->users->removeElement($user);
-//    }
+    public function addUser(User $user) {
+        if(!$this->users->contains($user))
+            $this->users->add($user);
+    }
+
+    public function removeUser(User $user) {
+        if($this->users->contains($user))
+            $this->users->removeElement($user);
+    }
+
+    public function resetCount() {
+        $this->count = 0;
+    }
+
+    public function addCount() {
+        $this->count ++;
+    }
+
+    public function getCount() {
+        return $this->count;
+    }
+
+    public function getResult() {
+        return $this->count + $this->adjust;
+    }
 
     public function jsonSerialize()
     {

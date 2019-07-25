@@ -7,6 +7,8 @@
  */
 namespace App\Controller;
 use App\Controller\AbstractController;
+use App\Entity\Choice;
+use App\Entity\Section;
 use App\Entity\Ticket;
 use App\Entity\User;
 use App\Entity\Vote;
@@ -185,29 +187,24 @@ class VoteController extends AbstractController
     /**
      * @Route("/result", methods="GET")
      */
-    public function result(Request $request) {
+    public function result(Request $request, VoteManagerService $voteManagerService) {
+        $this->denyAccessUnlessGranted(User::ROLE_USER);
 
-        $this->denyAccessUnlessGranted(Permission::IS_ADMIN);
         $id = $request->request->get("id");
-        if($id == 'new')
-            return $this->response()->response(null);
-        $em = $this->getDoctrine()->getManager();
         /** @var Vote $vote */
-        $vote = $em->getRepository(Vote::class)->find($id);
+        $vote = $voteManagerService->findCurrent();
+
+        if(is_null($vote) || $vote->getId()->toString() != $id)
+            return $this->response("Your vote does not exist.", Response::HTTP_NOT_FOUND);
+        if($vote->getStatus() != VoteStatus::RESULTS_RELEASED)
+            return $this->response("Your vote does not exist.", Response::HTTP_UNAUTHORIZED);
+
+        $em = $this->getDoctrine()->getManager();
+
         $tickets = $em->getRepository(Ticket::class)->findBy(["vote" => $vote]);
-        $result = array();
-        for($i=0; $i<count($vote->getOptions()); $i++) {
-            $result[$i] = array();
-            for($j=0; $j<count($vote->getOptions()[$i]["options"]); $j++) {
-                $result[$i][$j] = 0;
-            }
-        }
-        foreach ($tickets as $ticket) {
-            /** @var Ticket $ticket*/
-            foreach ($ticket->getChoices() as $key => $choice) {
-                $result[$key][$choice] ++;
-            }
-        }
+
+
+
         return $this->response()->response(array("total" => count($tickets), "detail" => $result));
     }
 }

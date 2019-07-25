@@ -45,12 +45,13 @@ class AbstractController extends \Symfony\Bundle\FrameworkBundle\Controller\Abst
     public function getUser(): ?User
     {
         return parent::getUser();
-
     }
+
     public function setting()
     {
         // return $this->getDoctrine()->getManager()->getRepository(Preference::class);
     }
+
     public function verifyCaptcha($captcha)
     {
         $verifyResponse = file_get_contents('https://www.recaptcha.net/recaptcha/api/siteverify?secret=' . $_ENV["GOOGLE_KEY"] . '&response=' . $captcha);

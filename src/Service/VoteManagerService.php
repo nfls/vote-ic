@@ -11,6 +11,7 @@ namespace App\Service;
 
 use App\Entity\Choice;
 use App\Entity\Section;
+use App\Entity\Ticket;
 use App\Entity\User;
 use App\Entity\Vote;
 use App\Library\VoteStatus;
@@ -73,13 +74,13 @@ class VoteManagerService
         return $vote;
     }
 
-    public function associate(string $user, string $id, bool $add = true) {
+    public function associate(string $userId, string $id, bool $add = true) {
         /** @var Choice $choice */
         $choice = $this->objectManager->getRepository(Choice::class)->find($id);
         /** @var User $user */
-        $user = $this->objectManager->getRepository(User::class)->find($user);
+        $user = $this->objectManager->getRepository(User::class)->find($userId);
         if (is_null($user))
-            $user = $this->objectManager->getRepository(User::class)->findOneBy(["name" => $user]);
+            $user = $this->objectManager->getRepository(User::class)->findOneBy(["name" => $userId]);
 
         if (is_null($choice))
             throw new \InvalidArgumentException("Cannot find the choice.");
@@ -91,6 +92,61 @@ class VoteManagerService
             $user->addCandidate($choice);
         else
             $user->removeCandidate($choice);
+
+        $this->objectManager->persist($user);
+        $this->objectManager->flush();
+    }
+
+    public function calculate(string $id) {
+        $vote = $this->retrieve($id);
+        foreach ($vote->getSections() as $section) {
+            foreach ($section->getChoices() as $choice) {
+                /** @var Choice $choice */
+                $choice->resetCount();
+                $this->objectManager->persist($choice);
+            }
+        }
+        $this->objectManager->flush();
+        $tickets = $this->objectManager->getRepository(Ticket::class)->findBy(["vote" => $vote]);
+        foreach($tickets as $ticket) {
+            /** @var Ticket $ticket */
+            foreach($ticket->getChoices() as $choice) {
+                /** @var Choice $choice */
+                $choice->addCount();
+                $this->objectManager->persist($choice);
+            }
+        }
+        $this->objectManager->flush();
+    }
+
+    public function result(string $id, bool $verbose = false) {
+        $vote = $this->retrieve($id);
+        if(!$verbose) {
+            foreach ($vote->getSections() as $section) {
+                /** @var Section $section */
+                $maxChoice = null;
+                $maxResult = -1;
+                foreach ($section->getChoices() as $choice) {
+                    /** @var Choice $choice */
+                    if ($choice->getResult() > $maxResult) {
+                        $maxChoice = $choice;
+                        $maxResult = $choice->getResult();
+                    }
+                }
+                $section->win = $maxChoice;
+            }
+            return array_values(array_map(function($section) {
+                /** @var Section $section */
+                $info = $section->jsonSerialize();
+                $info["maxChoice"] = [
+                    "name" => $section->win->getName(),
+                    "result" => $section->win->getResult()
+                ];
+                return $info;
+            }, $vote->getSections()->toArray()));
+        } else {
+            return $vote->getSections();
+        }
     }
 
     public function listAll() {

@@ -37,6 +37,11 @@ class Section implements \JsonSerializable
      */
     private $choices;
 
+    /**
+     * @var Choice
+     */
+    public $win = null;
+
     public function __construct()
     {
         $this->choices = new ArrayCollection();

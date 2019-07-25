@@ -53,13 +53,13 @@ class User implements UserInterface, \JsonSerializable
      * @return int|null
      */
 
-    //**
-    // * If a user is a candidate in a vote.
-    // *
-    // * @ORM\ManyToMany(targetEntity="Choice", inversedBy="users")
-    // * @ORM\JoinTable(name="user_candidates")
-    // */
-    // private $candidates;
+    /**
+     * If a user is a candidate in a vote.
+     *
+     * @ORM\ManyToMany(targetEntity="Choice", inversedBy="users")
+     * @ORM\JoinTable(name="user_candidates")
+     */
+     private $candidates;
 
 
     public function getId(): ?int
@@ -145,7 +145,6 @@ class User implements UserInterface, \JsonSerializable
         return null;
     }
 
-    /*
 
     public function addCandidate(Choice $choice) {
         if(!$this->candidates->contains($choice))
@@ -159,7 +158,6 @@ class User implements UserInterface, \JsonSerializable
         $choice->removeUser($this);
     }
 
-    */
 
     public function jsonSerialize()
     {
