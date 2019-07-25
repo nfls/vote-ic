@@ -34,7 +34,9 @@ class SMService
         $this->redis = RedisAdapter::createConnection('redis://localhost');
     }
 
-    public function sendCode(User $user) {
+    public function sendCode(User $user, string $ip) {
+        if (!$this->canSend($user, $ip))
+            return null;
         $code = $this->getRandomCode();
         if($this->send($user->getPhone(), "SMS_171187527", ["code_begin" => substr($code, 0, 3), "code_end" => substr($code, 3, 3)])) {
             $this->redis->set($this->getKey($user), $code);
@@ -47,16 +49,44 @@ class SMService
 
     public function verifyCode(User $user, string $code) {
         if($this->redis->get($this->getKey($user)) == $code) {
+            $this->redis->del($this->getRateKey($user));
             $this->redis->del($this->getKey($user));
             return true;
         } else {
-            $this->rate(); //TODO
+            if($this->rate($user))
+                return false;
+            else
+                return null;
+        }
+    }
+
+    private function rate(User $user) {
+        $current = (int)$this->redis->get($this->getRateKey($user));
+        if($current <= 3) {
+            $current++;
+            $this->redis->set($this->getRateKey($user), $current);
+            return true;
+        } else {
+            $this->redis->del($this->getRateKey($user));
+            $this->redis->del($this->getKey($user));
             return false;
         }
     }
 
-    private function rate() {
-
+    private function canSend(User $user, string $ip) {
+        $current = (int)$this->redis->get($this->getLimitKey($ip));
+        if($current >= 5)
+            return false;
+        $current ++;
+        $this->redis->set($this->getLimitKey($ip), $current);
+        $this->redis->expire($this->getLimitKey($ip), 60);
+        $current = (int)$this->redis->get($this->getLimitKey($user->getPhone()));
+        if($current >= 1)
+            return false;
+        $current ++;
+        $this->redis->set($this->getLimitKey($user->getPhone()), $current);
+        $this->redis->expire($this->getLimitKey($user->getPhone()), 30);
+        return true;
     }
 
     public function sendId(User $user, Ticket $ticket) {
@@ -65,6 +95,14 @@ class SMService
 
     private function getKey(User $user) {
         return "vote".$user->getPhone();
+    }
+
+    private function getRateKey(User $user) {
+        return "try.".$user->getPhone();
+    }
+
+    private function getLimitKey(string $target) {
+        return "limit.".$target;
     }
 
     private function send(?string $receiver, string $template, array $params) {

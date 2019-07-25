@@ -13,11 +13,11 @@ use App\Entity\Vote;
 use App\Library\VoteStatus;
 use App\Service\SMService;
 use App\Service\VoteManagerService;
-use mysql_xdevapi\Session;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Encoder\PasswordEncoderInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Translation\TranslatorInterface;
@@ -32,9 +32,17 @@ class VoteController extends AbstractController
     }
 
     /**
+     * @Route("/user", methods="GET")
+     */
+    public function user() {
+        return $this->responseEntity($this->getUser());
+    }
+
+    /**
      * @Route("/current", methods="GET")
      */
     public function current() {
+        $this->denyAccessUnlessGranted(User::ROLE_USER);
         $votes = $this
             ->getDoctrine()
             ->getManager()
@@ -58,8 +66,13 @@ class VoteController extends AbstractController
         ]);
         if (is_null($user))
             return $this->response("User not found.", 404);
-        $service->sendCode($user);
-        return $this->response("Sent successfully.");
+        $result = $service->sendCode($user, $request->getClientIp());
+        if (is_null($result))
+            return $this->response("Your rate has hit the limit. Try again 60 seconds later.", 403);
+        else if ($result)
+            return $this->response("Sent successfully.");
+        else
+            return $this->response("Failed to send. Please contact admin.", 400);
     }
 
     /**
@@ -79,13 +92,15 @@ class VoteController extends AbstractController
             "phone" => $request->request->get("phone")
         ]);
 
-        if($service->verifyCode($user, $request->request->get("code"))) {
+        $result = $service->verifyCode($user, $request->request->get("code"));
+        if(is_null($result))
+            return $this->response("Expired. Please send the code again.", 403);
+        else if($result) {
             $session->set("phone", $user->getPhone());
             return $this->response(null);
         } else {
             return $this->response("Incorrect code.", 400);
         }
-
     }
 
     /**
@@ -98,8 +113,8 @@ class VoteController extends AbstractController
     /**
      * @Route("/submit", methods="POST")
      */
-    public function vote(Request $request, VoteManagerService $voteManagerService) {
-        //$this->denyAccessUnlessGranted(Permission::IS_LOGIN);
+    public function vote(Request $request, VoteManagerService $voteManagerService, SMService $service) {
+        $this->denyAccessUnlessGranted(User::ROLE_USER);
 
         $id = $request->request->get("id");
         /** @var Vote $vote */
@@ -114,15 +129,17 @@ class VoteController extends AbstractController
 
         if(!is_null($em->getRepository(Ticket::class)->findOneByUserAndVote($this->getUser(), $vote)))
             return $this->response("You have already voted.", Response::HTTP_FORBIDDEN);
+
+        if(!$request->request->has("code"))
+            return $this->response("Please enter your code.", Response::HTTP_UNAUTHORIZED);
+
+        if(!$service->verifyCode($this->getUser(), $request->request->get("code")))
+            return $this->response("Your code is not correct.", Response::HTTP_UNAUTHORIZED);
+
+        if(!$request->request->has("deviceId") || !$request->request->has("other"))
+            return $this->response("Invalid client.",Response::HTTP_BAD_REQUEST);
+
         try {
-            // if(!$passwordEncoder->isPasswordValid($this->getUser(), $request->request->get("password"))) {
-            //    return $this->response()->response($translator->trans("incorrect-password"), Response::HTTP_BAD_REQUEST);
-            //} // TODO: SMS Verification.
-
-            if(!$request->request->has("deviceId") || !$request->request->has("other")) {
-                return $this->response("Invalid client.",Response::HTTP_BAD_REQUEST);
-            }
-
             $ticket = new Ticket(
                 $vote,
                 $this->getUser(),

@@ -35,7 +35,7 @@ class VoteManagerService
         $vote = new Vote();
         $vote->setTitle($name);
         $vote->setContent("");
-        $vote->setEnabled(false);
+        $vote->setStatus(VoteStatus::HIDDEN);
         foreach ($data as $key => $value) {
             $section = new Section();
             $section->setName($key);

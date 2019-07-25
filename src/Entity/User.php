@@ -8,14 +8,11 @@ use Symfony\Component\Security\Core\User\UserInterface;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  */
-class User implements UserInterface
+class User implements UserInterface, \JsonSerializable
 {
 
-    const ROLE_ANONYMOUS = 0;
-    const ROLE_VOTER = 1;
-    const ROLE_PARTICIPANTS = 2;
-    const ROLE_ADMIN = 3;
-    const ROLE_ROOT = 4;
+    const ROLE_USER = "ROLE_USER";
+    const ROLE_ADMIN = "ROLE_ADMIN";
 
     public function __construct(string $phone, string $identifier, int $role)
     {
@@ -47,10 +44,10 @@ class User implements UserInterface
     private $identifier;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="boolean")
      */
 
-    private $role;
+    private $admin;
     /**
      * @return int|null
      */
@@ -58,11 +55,6 @@ class User implements UserInterface
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getRole(): int
-    {
-        return $this->role;
     }
 
     public function getName(): string
@@ -73,10 +65,6 @@ class User implements UserInterface
     public function getPhone(): string
     {
         return $this->phone;
-    }
-
-    static function getAnonymousUser() {
-        return new User("", "", self::ROLE_ANONYMOUS);
     }
 
     /**
@@ -95,7 +83,10 @@ class User implements UserInterface
      */
     public function getRoles()
     {
-        return [];
+        if ($this->admin)
+            return [self::ROLE_ADMIN, self::ROLE_USER];
+        else
+            return [self::ROLE_USER];
     }
 
     /**
@@ -142,5 +133,15 @@ class User implements UserInterface
     public function eraseCredentials()
     {
         return null;
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            "id" => $this->getId(),
+            "name" => $this->getName(),
+            "phone" => $this->getPhone(),
+            "identifier" => $this->identifier
+        ];
     }
 }

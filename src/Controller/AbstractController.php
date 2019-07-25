@@ -42,13 +42,9 @@ class AbstractController extends \Symfony\Bundle\FrameworkBundle\Controller\Abst
     /**
      * @return User
      */
-    public function getUser()
+    public function getUser(): ?User
     {
-        if (is_null(parent::getUser())) {
-            return User::getAnonymousUser();
-        } else {
-            return parent::getUser();
-        }
+        return parent::getUser();
 
     }
     public function setting()

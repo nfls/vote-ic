@@ -1,13 +1,21 @@
 security:
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
-        in_memory: { memory: ~ }
+        phone:
+            entity:
+                class: App\Entity\User
+                property: phone
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
-            anonymous: true
+            provider: phone
+            anonymous: ~
+            guard:
+                    authenticators:
+                        - App\Authenticator\SessionAuthenticator
+                    entry_point: App\Authenticator\SessionAuthenticator
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
