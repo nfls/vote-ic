@@ -48,7 +48,7 @@ class SMService
     }
 
     public function sendOrder(User $user, Ticket $ticket) {
-        $this->send($user->getPhone(), "SMS_171187527", ["sn" => $ticket->getCode()]);
+        $this->send($user->getPhone(), "SMS_171192462", ["sn" => $ticket->getCode()]);
     }
 
     public function verifyCode(User $user, string $code, string $action) {
