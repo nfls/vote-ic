@@ -11,6 +11,7 @@
                             <v-card-title>登录</v-card-title>
                             <v-divider></v-divider>
                             <v-card-text>
+                                请不要反复登录，每个手机号每小时最多接收5条验证码。
                                 <v-form>
                                     <v-text-field prepend-icon="person" name="name" label="中文名" v-model="form.name"
                                                   type="text" :error-messages="error.user"></v-text-field>
