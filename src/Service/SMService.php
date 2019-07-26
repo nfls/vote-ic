@@ -38,7 +38,7 @@ class SMService
         if (!$this->canSend($user, $ip))
             return null;
         $code = $this->getRandomCode();
-        if($this->send($user->getPhone(), "SMS_171187527", ["code_begin" => substr($code, 0, 3), "code_end" => substr($code, 3, 3)])) {
+        if($this->send($user->getPhone(), "login", ["code_begin" => substr($code, 0, 3), "code_end" => substr($code, 3, 3)])) {
             $this->redis->set($this->getKey($user, $action), $code);
             $this->redis->expire($this->getKey($user, $action), 180);
             return true;
@@ -48,7 +48,7 @@ class SMService
     }
 
     public function sendOrder(User $user, Ticket $ticket) {
-        $this->send($user->getPhone(), "SMS_171192462", ["sn" => $ticket->getCode()]);
+        $this->send($user->getPhone(), "confirm", ["sn" => $ticket->getCode()]);
     }
 
     public function verifyCode(User $user, string $code, string $action) {
