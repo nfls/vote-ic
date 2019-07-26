@@ -98,7 +98,7 @@ class Ticket implements \JsonSerializable
         $this->vote = $vote;
         $this->user = $user;
         $this->choices = $choices;
-        $this->code = bin2hex(random_bytes(10));
+        $this->code = bin2hex(random_bytes(4));
         $this->time = new \DateTime();
         $this->ip = $ip;
         $this->userAgent = $userAgent;
