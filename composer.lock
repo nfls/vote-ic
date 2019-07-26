@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f7090a0b293c5e6b58453e37e6e53bf3",
+    "content-hash": "ac33a5c5227018d4b89a1fd2d28b8209",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -1315,6 +1315,58 @@
                 "rest"
             ],
             "time": "2016-10-17T18:31:11+00:00"
+        },
+        {
+            "name": "itbdw/ip-database",
+            "version": "v2.0.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/itbdw/ip-database.git",
+                "reference": "10c90dfd29bc913f8378f7272ad30ede1b6e14f6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/itbdw/ip-database/zipball/10c90dfd29bc913f8378f7272ad30ede1b6e14f6",
+                "reference": "10c90dfd29bc913f8378f7272ad30ede1b6e14f6",
+                "shasum": ""
+            },
+            "require": {
+                "php": "~5.4|~7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "itbdw\\Ip\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "马秉尧"
+                },
+                {
+                    "name": "itbdw",
+                    "role": "Developer",
+                    "email": "itbudaoweng@gmail.com",
+                    "homepage": "http://github.com/itbdw"
+                }
+            ],
+            "description": "IP位置数据库（解析为国家、省、市、县、运营商）",
+            "keywords": [
+                "China",
+                "Chinese",
+                "IP",
+                "database",
+                "location",
+                "位置",
+                "地区",
+                "数据库",
+                "纯真"
+            ],
+            "time": "2019-07-25T07:36:47+00:00"
         },
         {
             "name": "jdorn/sql-formatter",

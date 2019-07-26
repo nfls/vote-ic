@@ -9,6 +9,8 @@
 namespace App\Authenticator;
 
 
+use App\Library\LocationHelper;
+use itbdw\Ip\IpLocation;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -64,7 +66,10 @@ class SessionAuthenticator extends AbstractGuardAuthenticator
      */
     public function supports(Request $request)
     {
-        return $request->getSession()->has("phone");
+        if (LocationHelper::check($request->getClientIp()))
+            return $request->getSession()->has("phone");
+        else
+            return false;
     }
 
     /**

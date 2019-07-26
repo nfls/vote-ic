@@ -6,6 +6,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-json": "*",
+        "itbdw/ip-database": "^2.0",
         "massivescale/celery-php": "^2.1",
         "predis/predis": "^1.1",
         "ramsey/uuid-doctrine": "^1.5",

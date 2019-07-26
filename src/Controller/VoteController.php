@@ -12,10 +12,12 @@ use App\Entity\Section;
 use App\Entity\Ticket;
 use App\Entity\User;
 use App\Entity\Vote;
+use App\Library\LocationHelper;
 use App\Library\VoteStatus;
 use App\Service\SMService;
 use App\Service\VoteManagerService;
 use http\Cookie;
+use itbdw\Ip\IpLocation;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -38,8 +40,11 @@ class VoteController extends AbstractController
     /**
      * @Route("/user", methods="GET")
      */
-    public function user() {
-        return $this->responseEntity($this->getUser());
+    public function user(Request $request) {
+        if (LocationHelper::check($request->getClientIp()))
+            return $this->responseEntity($this->getUser());
+        else
+            return $this->response(null, 403);
     }
 
     /**
@@ -62,6 +67,8 @@ class VoteController extends AbstractController
      * @Route("/send", methods="POST")
      */
     public function send(Request $request, SMService $service) {
+        if (!LocationHelper::check($request->getClientIp()))
+            return $this->response(null);
         if(!$request->request->has("name") || !$request->request->has("phone"))
             return $this->response("Invalid request.", 400);
         if ($request->request->has("confirm")) {
@@ -267,4 +274,34 @@ class VoteController extends AbstractController
             return $this->response(false);
         }
     }
+
+    /**
+     * @Route("/query")
+     */
+    public function query(Request $request) {
+        if(!LocationHelper::check($request->getClientIp()))
+            return Response::create();
+        if($request->getMethod() == "POST") {
+            $captcha = $request->request->get("g-recaptcha-response");
+            if($this->verifyCaptcha($captcha)) {
+                /** @var Ticket $ticket */
+                $ticket = $this->getDoctrine()->getRepository(Ticket::class)->findOneBy(["code" => $request->request->get("code")]);
+                if(is_null($ticket))
+                    $info = "找不到选票。";
+                else
+                    $info = array_reduce($ticket->getChoices()->toArray(), function($prev, $current){
+                        return $prev . $current->getName() . "<br/>";
+                    }, "");
+            } else {
+                $info = "验证码不正确。";
+            }
+        } else {
+            $info = "";
+        }
+
+        return $this->render("query.html.twig", [
+            "data" => $info
+        ]);
+    }
+
 }

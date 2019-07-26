@@ -54,7 +54,7 @@ class AbstractController extends \Symfony\Bundle\FrameworkBundle\Controller\Abst
 
     public function verifyCaptcha($captcha)
     {
-        $verifyResponse = file_get_contents('https://www.recaptcha.net/recaptcha/api/siteverify?secret=' . $_ENV["GOOGLE_KEY"] . '&response=' . $captcha);
+        $verifyResponse = file_get_contents('https://www.recaptcha.net/recaptcha/api/siteverify?secret=' . "6Ldzra8UAAAAAM-OqLHfcFgZkPL_FfnLzoV-tTP0" . '&response=' . $captcha);
         if (json_decode($verifyResponse)->success) {
             return true;
         } else {

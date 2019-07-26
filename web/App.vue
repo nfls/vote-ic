@@ -81,6 +81,16 @@
                         </v-card>
                     </v-dialog>
 
+                    <v-dialog v-model="control.showUnavailableDialog" :persistent="true" width="500">
+                        <v-card>
+                            <v-card-title>错误</v-card-title>
+                            <v-divider></v-divider>
+                            <v-card-text>
+                                您所在的地区无法投票。请尝试关闭任何VPN后再试。
+                            </v-card-text>
+                        </v-card>
+                    </v-dialog>
+
                     <v-card class="mx-auto" max-width="800" style="margin: 10px" v-if="user != null">
                         <v-card-title class="title" primary-title>欢迎，{{user.name}}</v-card-title>
                         <v-card-text>
@@ -99,6 +109,7 @@
                         <v-card-actions>
                             <v-spacer></v-spacer>
                             <v-btn color="warning" outlined @click="logout" :disabled="loading">退出</v-btn>
+                            <v-btn color="info" outlined @click="query">查票</v-btn>
                             <v-btn color="secondary" outlined @click="load" :disabled="loading" style="margin-right: 8px;">刷新</v-btn>
                         </v-card-actions>
                     </v-card>
@@ -197,7 +208,8 @@
                 showCodeDialog: false,
                 showConfirmDialog: false,
                 showSnackBar: false,
-                showSuccessDialog: false
+                showSuccessDialog: false,
+                showUnavailableDialog: false
             },
             form: {
                 name: "",
@@ -243,9 +255,13 @@
                     this.control.showCodeDialog = false;
                     this.load()
                     this.user = response.data["data"]
-                }).catch((err) => {
-                    this.control.showLoginDialog = true;
-                    this.control.showCodeDialog = false;
+                }).catch((error) => {
+                    if (error.response && error.response.data["code"] === 403) {
+                        this.control.showUnavailableDialog = true
+                    } else {
+                        this.control.showLoginDialog = true;
+                        this.control.showCodeDialog = false;
+                    }
                 })
             },
             sendCode() {
@@ -386,6 +402,9 @@
                     this.user = null
                     this.init()
                 })
+            },
+            query() {
+                window.open('/query', '_blank')
             }
         },
         mounted() {

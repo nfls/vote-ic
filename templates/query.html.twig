@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <script src="https://www.recaptcha.net/recaptcha/api.js" async defer></script>
+    <title>投票查询系统</title>
+</head>
+<body>
+<div id="app">
+    <h3>选票查询系统</h3>
+    <h5>请输入您短信中的流水号，即可查询您的选票详情。</h5>
+    <form action="/query" method="post">
+
+        <input type="text" name="code" placeholder="流水号">
+
+        <div class="g-recaptcha" data-sitekey="6Ldzra8UAAAAAM-OqLHfcFgZkPL_FfnLzoV-tTP0" style="margin-top: 20px; margin-bottom: 20px;"></div>
+
+        <input type="submit" value="提交">
+    </form>
+    <br/>
+    <code>
+        {{ data | raw  }}
+    </code>
+</div>
+</body>
+</html>
