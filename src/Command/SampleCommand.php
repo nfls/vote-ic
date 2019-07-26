@@ -24,7 +24,7 @@ class SampleCommand extends AbstractVoteCommand
     {
         $io = new SymfonyStyle($input, $output);
 
-        $id = $this->voteManagerService->create("2016-2017届剑桥IB国际部学生会竞选（样例）", [
+        $id = $this->voteManagerService->create("2016 - 2017届剑桥IB国际部学生会竞选（样例）", [
             "① 主席" => [
                 "1号 曹恺珺 屠晓芃",
                 "2号 高子桉 江慧卓玛",

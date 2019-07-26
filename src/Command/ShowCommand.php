@@ -2,6 +2,9 @@
 
 namespace App\Command;
 
+use App\Entity\Choice;
+use App\Entity\Section;
+use App\Entity\Vote;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -9,32 +12,43 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class ShowCommand extends Command
+class ShowCommand extends AbstractVoteCommand
 {
-    protected static $defaultName = 'show';
+    protected static $defaultName = 'app:show';
 
     protected function configure()
     {
         $this
-            ->setDescription('Add a short description for your command')
-            ->addArgument('arg1', InputArgument::OPTIONAL, 'Argument description')
-            ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
+            ->setDescription('Show details for a vote.')
+            ->addArgument('id', InputArgument::OPTIONAL, 'The vote id.')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
-        $arg1 = $input->getArgument('arg1');
+        $id = $input->getArgument("id");
 
-        if ($arg1) {
-            $io->note(sprintf('You passed an argument: %s', $arg1));
+
+        /** @var Vote $vote */
+        $vote = $this->voteManagerService->retrieve($id);
+
+        $io->note($vote->getId());
+        $io->note($vote->getTitle());
+        $io->note($vote->getContent());
+
+        $io->newLine(1);
+
+        foreach ($vote->getSections()->toArray() as $section) {
+            /** @var Section $section */
+            $io->section($section->getName());
+            $io->table(["ID", "Name", "Associate"], array_map(function($choice){
+                /** @var Choice $choice */
+                return [$choice->getId(), $choice->getName(), array_reduce($choice->getUsers()->toArray(), function($carry, $user){
+                    return $carry . " " . $user->getName();
+                }, "")];
+            }, $section->getChoices()->toArray()));
         }
 
-        if ($input->getOption('option1')) {
-            // ...
-        }
-
-        $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
     }
 }

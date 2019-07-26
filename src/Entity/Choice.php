@@ -126,6 +126,10 @@ class Choice implements \JsonSerializable
         return $this->count + $this->adjust;
     }
 
+    public function getUsers() {
+        return $this->users;
+    }
+
     public function jsonSerialize()
     {
         return [

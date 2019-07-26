@@ -15,6 +15,7 @@ use App\Entity\Vote;
 use App\Library\VoteStatus;
 use App\Service\SMService;
 use App\Service\VoteManagerService;
+use http\Cookie;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -76,14 +77,14 @@ class VoteController extends AbstractController
         }
 
         if (is_null($user))
-            return $this->response("User not found.", 404);
+            return $this->response("找不到用户。", 404);
         $result = $service->sendCode($user, $request->getClientIp(), $action);
         if (is_null($result))
-            return $this->response("Your rate has hit the limit. Try again 60 seconds later.", 403);
+            return $this->response("请求频率过高，请在60秒之后再尝试发送验证码。", 403);
         else if ($result)
-            return $this->response("Sent successfully.");
+            return $this->response("发送成功。");
         else
-            return $this->response("Failed to send. Please contact admin.", 400);
+            return $this->response("发送失败，请联系管理员。", 400);
     }
 
     /**
@@ -105,12 +106,12 @@ class VoteController extends AbstractController
 
         $result = $service->verifyCode($user, $request->request->get("code"), "login");
         if(is_null($result))
-            return $this->response("Expired. Please send the code again.", 403);
+            return $this->response("验证码已失效，请尝试重新发送。", 403);
         else if($result) {
             $session->set("phone", $user->getPhone());
             return $this->response(null);
         } else {
-            return $this->response("Incorrect code.", 400);
+            return $this->response("验证码不正确。", 400);
         }
     }
 
@@ -118,7 +119,15 @@ class VoteController extends AbstractController
      * @Route("/logout", methods="POST")
      */
     public function logout(Request $request) {
-
+        $request->getSession()->start();
+        $request->getSession()->clear();
+        //$request->getSession()->invalidate(0);
+        $request->getSession()->remove("phone");
+        $response = $this->response(null, 200);
+        $time = new \DateTime();
+        $time->sub(new \DateInterval("P1M"));
+        $response->headers->setCookie(new \Symfony\Component\HttpFoundation\Cookie("PHPSESSID", "deleted", $time, "/", null, false, true));
+        return $response;
     }
 
 
@@ -164,7 +173,7 @@ class VoteController extends AbstractController
             $em->persist($ticket);
             $em->flush();
 
-
+            $service->sendOrder($this->getUser(), $ticket);
             /*
             $info = json_encode([
                 "request" => $request->request->all(),
@@ -235,6 +244,27 @@ class VoteController extends AbstractController
             return $this->response($info);
         } else {
             return $this->responseEntity($choice);
+        }
+    }
+
+    /**
+     * @Route("/voted", methods="GET")
+     */
+    public function voted(Request $request, VoteManagerService $voteManagerService) {
+        $this->denyAccessUnlessGranted(User::ROLE_USER);
+        $id = $request->query->get("id");
+        /** @var Vote $vote */
+        $vote = $voteManagerService->findCurrent();
+
+        if(is_null($vote) || $vote->getId()->toString() != $id)
+            return $this->response("Your vote does not exist.", Response::HTTP_NOT_FOUND);
+        /** @var Choice $choice */
+        $ticket = $this->getDoctrine()->getManager()->getRepository(Ticket::class)->findOneByUserAndVote($this->getUser(), $vote);
+
+        if (!is_null($ticket)) {
+            return $this->response(true);
+        } else {
+            return $this->response(false);
         }
     }
 }

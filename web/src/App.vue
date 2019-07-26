@@ -9,21 +9,18 @@
                     <v-dialog v-model="control.showLoginDialog" :persistent="true" width="500">
                         <v-card>
                             <v-card-title>登录</v-card-title>
-
+                            <v-divider></v-divider>
                             <v-card-text>
                                 <v-form>
-                                    <v-text-field prepend-icon="person" name="name" label="中文名" v-model="name"
-                                                  type="text" :error-messages="usererror"></v-text-field>
-                                    <v-text-field prepend-icon="phone" name="phone" label="手机号" v-model="phone"
-                                                  type="text" :error-messages="usererror"></v-text-field>
+                                    <v-text-field prepend-icon="person" name="name" label="中文名" v-model="form.name"
+                                                  type="text" :error-messages="error.user"></v-text-field>
+                                    <v-text-field prepend-icon="phone" name="phone" label="手机号" v-model="form.phone"
+                                                  type="text" :error-messages="error.user"></v-text-field>
                                 </v-form>
                             </v-card-text>
-
-                            <v-divider></v-divider>
-
                             <v-card-actions>
                                 <v-spacer></v-spacer>
-                                <v-btn color="primary" flat @click="sendCode" :disable="loading">发送动态码</v-btn>
+                                <v-btn color="primary" @click="sendCode" :disabled="loading" style="margin-right: 7px;">发送验证码</v-btn>
                             </v-card-actions>
                         </v-card>
                     </v-dialog>
@@ -31,19 +28,18 @@
                     <v-dialog v-model="control.showCodeDialog" :persistent="true" width="500">
                         <v-card>
                             <v-card-title>登录</v-card-title>
-
+                            <v-divider></v-divider>
                             <v-card-text>
                                 <v-form>
-                                    <v-text-field prepend-icon="lock" name="code" label="动态码" type="text"
-                                                  v-model="code" :error-messages="codeerror"></v-text-field>
+                                    <v-text-field prepend-icon="lock" name="code" label="验证码" type="text"
+                                                  v-model="form.code" :error-messages="error.code"></v-text-field>
                                 </v-form>
                             </v-card-text>
 
-                            <v-divider></v-divider>
-
                             <v-card-actions>
                                 <v-spacer></v-spacer>
-                                <v-btn color="primary" flat @click="login" :disable="loading">登录</v-btn>
+                                <v-btn color="secondary" @click="init" :disabled="loading">取消</v-btn>
+                                <v-btn color="primary" @click="login" :disabled="loading" style="margin-right: 7px;">登录</v-btn>
                             </v-card-actions>
                         </v-card>
                     </v-dialog>
@@ -51,21 +47,34 @@
                     <v-dialog v-model="control.showConfirmDialog" :persistent="true" width="500">
                         <v-card>
                             <v-card-title>提交确认</v-card-title>
-
+                            <v-divider></v-divider>
                             <v-card-text>
                                 请输入您收到的手机验证码，确认提交投票。
                                 <v-form>
-                                    <v-text-field name="code" label="手机验证码" type="text" v-model="form.confirmCode"
+                                    <v-text-field name="code" label="验证码" type="text" v-model="form.confirmCode"
                                                   :error-messages="error.confirm"></v-text-field>
                                 </v-form>
                             </v-card-text>
 
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn color="secondary" @click="control.showConfirmDialog = false" :disabled="loading">取消</v-btn>
+                                <v-btn color="primary" @click="submit" :disabled="loading" style="margin-right: 7px;">提交</v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
+
+                    <v-dialog v-model="control.showSuccessDialog" :persistent="true" width="500">
+                        <v-card>
+                            <v-card-title>投票成功</v-card-title>
                             <v-divider></v-divider>
+                            <v-card-text>
+                                您已投票成功，填写内容已无法修改。您可以凭您短信中的流水号，查询您所提交的投票内容。
+                            </v-card-text>
 
                             <v-card-actions>
                                 <v-spacer></v-spacer>
-                                <v-btn color="secondary" flat @click="control.showConfirmDialog = false">取消</v-btn>
-                                <v-btn color="primary" flat @click="submit" :disable="loading">提交</v-btn>
+                                <v-btn color="primary" @click="control.showSuccessDialog = false" style="margin-right: 7px;">好的</v-btn>
                             </v-card-actions>
                         </v-card>
                     </v-dialog>
@@ -87,7 +96,8 @@
                         </v-card-text>
                         <v-card-actions>
                             <v-spacer></v-spacer>
-                            <v-btn color="warning" @click="logout">退出</v-btn>
+                            <v-btn color="warning" outlined @click="logout" :disabled="loading">退出</v-btn>
+                            <v-btn color="secondary" outlined @click="load" :disabled="loading" style="margin-right: 8px;">刷新</v-btn>
                         </v-card-actions>
                     </v-card>
 
@@ -103,12 +113,21 @@
                             <v-layout>
                                 <v-flex>
                                     <v-form v-if="vote != null">
-                                        <v-alert v-if="vote.status !== 2" type="error">
-                                            现在暂时无法投票。
+                                        <v-alert v-if="vote.status === 1" type="error">
+                                            现在无法投票。
+                                        </v-alert>
+                                        <v-alert v-else-if="vote.status === 2" type="info">
+                                            投票已开启，请尽快完成投票。
+                                        </v-alert>
+                                        <v-alert v-else-if="vote.status === 3" type="info">
+                                            投票结果已公布，请及时查看。
+                                        </v-alert>
+                                        <v-alert v-if="voted" type="success">
+                                            您已成功提交您的选票。
                                         </v-alert>
                                         <div v-for="section in vote.sections" :key="section.id">
                                             <header> {{ section.name }}</header>
-                                            <v-radio-group v-model="choices[section.id]" row :disabled="vote.status !== 2">
+                                            <v-radio-group v-model="choices[section.id]" row :disabled="vote.status !== 2 || voted">
                                                 <v-radio v-for="choice in section.choices"
                                                          :key="choice.id"
                                                          :value="choice.id"
@@ -127,7 +146,7 @@
                         </v-card-text>
                         <v-card-actions>
                             <v-spacer></v-spacer>
-                            <v-btn color="primary" @click="sendConfirm" :disabled="vote == null || vote.status !== 2">提交</v-btn>
+                            <v-btn color="primary" @click="sendConfirm" v-if="vote != null && vote.status === 2" :disabled="loading || voted" outlined style="margin-right: 8px;">提交</v-btn>
                         </v-card-actions>
                     </v-card>
 
@@ -155,9 +174,16 @@
                         </v-card-text>
 
                     </v-card>
+
+                    <v-snackbar v-model="control.showSnackBar"> {{error.common}} </v-snackbar>
                 </v-flex>
             </v-container>
         </v-content>
+        <v-footer class="font-weight-medium">
+            <v-flex text-center xs12>
+                {{ new Date().getFullYear() }} — <strong>Innovation Club</strong>
+            </v-flex>
+        </v-footer>
     </v-app>
 </template>
 
@@ -167,87 +193,134 @@
             control: {
                 showLoginDialog: false,
                 showCodeDialog: false,
-                showConfirmDialog: false
+                showConfirmDialog: false,
+                showSnackBar: false,
+                showSuccessDialog: false
             },
             form: {
-                confirmCode: ""
+                name: "",
+                phone: "",
+                code: "",
+                confirmCode: "",
+                common: ""
             },
             error: {
-                confirm: ""
+                user: "",
+                code: "",
+                confirm: "",
             },
             loading: false,
             mine: null,
             results: null,
             vote: null,
+            voted: false,
             content: "",
             column: null,
             choices: {},
-            name: "",
-            phone: "",
-            code: "",
-            usererror: "",
-            codeerror: "",
             user: null
         }),
         methods: {
             init() {
+                this.form = {
+                    name: "",
+                    phone: "",
+                    code: "",
+                    confirmCode: ""
+                }
+                this.vote = null
+                this.choices = {}
+                this.results = null
+                this.error = {
+                    user: "",
+                    code: "",
+                    confirm: "",
+                }
+                this.voted = false
                 this.axios.get("/user").then((response) => {
+                    this.control.showLoginDialog = false;
+                    this.control.showCodeDialog = false;
                     this.load()
                     this.user = response.data["data"]
                 }).catch((err) => {
                     this.control.showLoginDialog = true;
+                    this.control.showCodeDialog = false;
                 })
             },
             sendCode() {
                 this.loading = true
                 this.axios.post("/send", {
-                    "name": this.name,
-                    "phone": this.phone
+                    "name": this.form.name,
+                    "phone": this.form.phone
                 }).then((response) => {
                     this.control.showLoginDialog = false
                     this.control.showCodeDialog = true
                     this.loading = false
                 }).catch((error) => {
                     if (error.response) {
-                        this.usererror = error.response.data["data"]
+                        this.error.user = error.response.data["data"]
+                    } else {
+                        this.error.code = "网络错误。"
                     }
                     this.loading = false
                 })
             },
             login() {
+                this.loading = true
                 this.axios.post("/login", {
-                    "name": this.name,
-                    "phone": this.phone,
-                    "code": this.code
+                    "name": this.form.name,
+                    "phone": this.form.phone,
+                    "code": this.form.code
                 }).then((response) => {
+                    this.loading = false
                     this.control.showLoginDialog = false
                     this.control.showCodeDialog = false
                     this.init()
                 }).catch((error) => {
                     if (error.response) {
-                        this.codeerror = error.response.data["data"]
+                        this.error.code = error.response.data["data"]
+                    } else {
+                        this.error.code = "网络错误。"
                     }
+                    this.loading = false
                 })
             },
             load() {
+                this.loading = true
                 this.axios.get("/current").then((response) => {
                     this.vote = response.data["data"]
                     var md = require('markdown-it')()
                     this.content = md.render(this.vote["content"])
-                    this.association()
+                    this.check()
+                }).catch((error) => {
+                    this.vote = null
+                    this.loading = false
                 })
             },
             sendConfirm() {
+                this.loading = true
+                this.error.confirm = ""
+                this.form.code = ""
                 this.axios.post("/send", {
                     phone: this.user.phone,
                     name: this.user.name,
                     confirm: true
                 }).then((response) => {
+                    this.loading = false
                     this.control.showConfirmDialog = true
+                }).catch((error) => {
+                    if (error.response) {
+                        this.error.common = error.response.data["data"]
+                        this.control.showSnackBar = true
+                    } else {
+                        this.error.common = "网络错误。"
+                        this.control.showSnackBar = true
+                    }
+                    this.loading = false
                 })
             },
             submit() {
                 let Fingerprint2 = require('fingerprintjs2')
+                this.loading = true
                 Fingerprint2.get((components) => {
                     let results = {}
                     let deviceId = ""
@@ -265,19 +338,37 @@
                         "id": this.vote.id,
                         "deviceId": deviceId,
                         "other": results,
-                        "choices": this.choices
+                        "choices": this.choices,
+                        "code": this.form.confirmCode
                     }).then((response) => {
-
+                        this.control.showConfirmDialog = false
+                        this.control.showSuccessDialog = true
+                        this.load()
                     }).catch((error)=>{
                         if (error.response) {
                             this.error.confirm = error.response.data["data"]
+                        } else {
+                            this.error.confirm = "网络错误"
                         }
+                        this.loading = false
                     })
                 })
             },
             result() {
                 this.axios.get("/result?id="+this.vote.id).then((response)=>{
                     this.results = response.data["data"]
+                    this.loading = false
+                }).catch((error)=>{
+                    this.loading = false
+                })
+            },
+            check(){
+                this.axios.get("/voted?id="+this.vote.id).then((response)=>{
+                    this.voted = response.data["data"]
+                    this.association()
+                }).catch((error) => {
+                    this.voted = false
+                    this.association()
                 })
             },
             association() {
@@ -289,7 +380,10 @@
                 })
             },
             logout() {
-
+                this.axios.post("/logout").then((response)=>{
+                    this.user = null
+                    this.init()
+                })
             }
         },
         mounted() {

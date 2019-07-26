@@ -145,6 +145,9 @@ class User implements UserInterface, \JsonSerializable
         return null;
     }
 
+    public function getIdentifier() {
+        return $this->identifier;
+    }
 
     public function addCandidate(Choice $choice) {
         if(!$this->candidates->contains($choice))

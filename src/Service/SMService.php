@@ -47,20 +47,24 @@ class SMService
         }
     }
 
+    public function sendOrder(User $user, Ticket $ticket) {
+        $this->send($user->getPhone(), "SMS_171187527", ["sn" => $ticket->getCode()]);
+    }
+
     public function verifyCode(User $user, string $code, string $action) {
         if($this->redis->get($this->getKey($user, $action)) == $code) {
             $this->redis->del($this->getRateKey($user));
             $this->redis->del($this->getKey($user, $action));
             return true;
         } else {
-            if($this->rate($user))
+            if($this->rate($user, $action))
                 return false;
             else
                 return null;
         }
     }
 
-    private function rate(User $user) {
+    private function rate(User $user, string $action) {
         $current = (int)$this->redis->get($this->getRateKey($user));
         if($current <= 3) {
             $current++;
@@ -68,7 +72,7 @@ class SMService
             return true;
         } else {
             $this->redis->del($this->getRateKey($user));
-            $this->redis->del($this->getKey($user));
+            $this->redis->del($this->getKey($user, $action));
             return false;
         }
     }

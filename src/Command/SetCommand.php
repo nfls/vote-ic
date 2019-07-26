@@ -39,5 +39,7 @@ class SetCommand extends AbstractVoteCommand
         $this->voteManagerService->set($id, VoteStatus::getValue($status));
 
         $io->success(("You have successfully set $id to " . $status));
+        if($status ==  VoteStatus::getDescription(VoteStatus::RESULTS_RELEASED))
+            $io->note("Please run app:result to calculate the final result.");
     }
 }

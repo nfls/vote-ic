@@ -149,6 +149,25 @@ class VoteManagerService
         }
     }
 
+    public function progress($id) {
+        $vote = $this->retrieve($id);
+        $users = $this->objectManager->getRepository(User::class)->findAll();
+        $info = [];
+        foreach ($users as $user) {
+            /** @var User $user */
+            $ticket = $this->objectManager->getRepository(Ticket::class)->findOneBy(["user" => $user, "vote" => $vote]);
+            $detail = $user->jsonSerialize();
+            if (!is_null($ticket))
+                $detail['ticket'] = $ticket->jsonSerialize();
+            else
+                $detail['ticket'] = null;
+            if(!array_key_exists($user->getIdentifier(), $info))
+                $info[$user->getIdentifier()] = [];
+            array_push($info[$user->getIdentifier()], $detail);
+        }
+        return $info;
+    }
+
     public function listAll() {
         $votes = $this->objectManager->getRepository(Vote::class)->findAll();
         return $votes;
