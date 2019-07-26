@@ -20,7 +20,7 @@
                                 </v-form>
                                 <div class="font-weight-bold">
                                     代投、刷票等行为将导致选票作废。<br/>
-                                请不要反复发送验证码，否则您的IP将被封禁。<br/></div>
+                                请不要反复发送验证码，否则您的IP将会被封禁。<br/></div>
                                 您与本站的通讯使用国际标准的加密协议。在投票时，我们会收集关于您设备的信息，用于分析作弊行为。收集的信息将不会与任何第三方分享，也不会被用于任何营销行为，并将在投票结束后销毁。
                             </v-card-text>
                             <v-card-actions>
@@ -60,6 +60,7 @@
                                     <v-text-field name="code" label="验证码" type="text" v-model="form.confirmCode"
                                                   :error-messages="error.confirm"></v-text-field>
                                 </v-form>
+
                             </v-card-text>
 
                             <v-card-actions>
@@ -113,7 +114,7 @@
                             </div>
                             <div v-if="mine != null">
                                 您的帐号已与 <kbd>{{mine.name}}</kbd> 关联。 <br/>
-                            </div>
+                            </div><br/>
                             <div class="font-weight-bold">
                                 严禁与他人共享账号，分享验证码。代投、刷票等行为将导致您的选票作废。<br/>
                                 不操作时，请及时退出。<br/>
@@ -155,7 +156,7 @@
                                         </v-alert>
                                         <div v-for="section in vote.sections" :key="section.id">
                                             <header> {{ section.name }}</header>
-                                            <v-radio-group v-model="choices[section.id]" row :disabled="vote.status !== 2 || voted">
+                                            <v-radio-group v-model="choices[section.id]" row :disabled="vote.status !== 2 || voted" required>
                                                 <v-radio v-for="choice in section.choices"
                                                          :key="choice.id"
                                                          :value="choice.id"
@@ -163,6 +164,7 @@
                                                 </v-radio>
                                             </v-radio-group>
                                         </div>
+                                        所有项目必填，不可不选。
 
                                     </v-form>
                                     <v-alert v-else type="error">
@@ -239,6 +241,7 @@
                 code: "",
                 confirm: "",
             },
+            valid: true,
             loading: false,
             mine: null,
             results: null,
@@ -368,11 +371,37 @@
                                 deviceId = fg[0].replace("canvas fp:data:image/png;base64,", "")
                         }
                     }
+                    // From stackoverflow
+                    var CryptoJS = require("crypto-js");
+                    var CryptoJSAesJson = {
+                        stringify: function (cipherParams) {
+                            var j = {ct: cipherParams.ciphertext.toString(CryptoJS.enc.Base64)};
+                            if (cipherParams.iv) j.iv = cipherParams.iv.toString();
+                            if (cipherParams.salt) j.s = cipherParams.salt.toString();
+                            return JSON.stringify(j);
+                        },
+                        parse: function (jsonStr) {
+                            var j = JSON.parse(jsonStr);
+                            var cipherParams = CryptoJS.lib.CipherParams.create({ciphertext: CryptoJS.enc.Base64.parse(j.ct)});
+                            if (j.iv) cipherParams.iv = CryptoJS.enc.Hex.parse(j.iv)
+                            if (j.s) cipherParams.salt = CryptoJS.enc.Hex.parse(j.s)
+                            return cipherParams;
+                        }
+                    }
+
+                    var AES = require("crypto-js/aes");
+
+                    let data = AES.encrypt(JSON.stringify(
+                        {
+                            "id": this.vote.id,
+                            "deviceId": deviceId,
+                            "other": results,
+                            "choices": this.choices,
+                            "code": this.form.confirmCode
+                        }), this.form.confirmCode, {format: CryptoJSAesJson}).toString();
+
                     this.axios.post("/submit", {
-                        "id": this.vote.id,
-                        "deviceId": deviceId,
-                        "other": results,
-                        "choices": this.choices,
+                        "data": data,
                         "code": this.form.confirmCode
                     }).then((response) => {
                         this.control.showConfirmDialog = false

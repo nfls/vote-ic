@@ -150,39 +150,51 @@ class VoteController extends AbstractController
      */
     public function vote(Request $request, VoteManagerService $voteManagerService, SMService $service) {
         $this->denyAccessUnlessGranted(User::ROLE_USER);
-
-        $id = $request->request->get("id");
-        /** @var Vote $vote */
-        $vote = $voteManagerService->findCurrent();
-
-        if(is_null($vote) || $vote->getId()->toString() != $id)
-            return $this->response("Your vote does not exist.", Response::HTTP_NOT_FOUND);
-        if($vote->getStatus() != VoteStatus::VOTING)
-            return $this->response("Your vote does not exist.", Response::HTTP_UNAUTHORIZED);
+        if(!$request->request->has("code"))
+            return $this->response("请输入验证码。", Response::HTTP_UNAUTHORIZED);
+        if(!$request->request->has("code") || !$request->request->has("data"))
+            return $this->response("无效的请求。", 403);
 
         $em = $this->getDoctrine()->getManager(); // Check if the user has already voted.
-
+        /** @var Vote $vote */
+        $vote = $voteManagerService->findCurrent();
         if(!is_null($em->getRepository(Ticket::class)->findOneByUserAndVote($this->getUser(), $vote)))
-            return $this->response("You have already voted.", Response::HTTP_FORBIDDEN);
+            return $this->response("您已经投过票了。", Response::HTTP_FORBIDDEN);
 
-        if(!$request->request->has("code"))
-            return $this->response("Please enter your code.", Response::HTTP_UNAUTHORIZED);
 
-        if(!$service->verifyCode($this->getUser(), $request->request->get("code"), "confirm"))
-            return $this->response("Your code is not correct.", Response::HTTP_UNAUTHORIZED);
+        $data = $request->request->get("data");
+        $code = $request->request->get("code");
 
-        if(!$request->request->has("deviceId") || !$request->request->has("other"))
-            return $this->response("Invalid client.",Response::HTTP_BAD_REQUEST);
+        $info = $this->cryptoJsAesDecrypt($code, $data);
+
+        if(is_null($data))
+            return $this->response("无效的请求。", 403);
+
+        $id = $info["id"];
+        if(is_null($vote) || $vote->getId()->toString() != $id)
+            return $this->response("投票不存在，请刷新。", Response::HTTP_NOT_FOUND);
+        if($vote->getStatus() != VoteStatus::VOTING)
+            return $this->response("投票不存在，请刷新。", Response::HTTP_UNAUTHORIZED);
+
+        $result = $service->verifyCode($this->getUser(), $request->request->get("code"), "confirm");
+        if(is_null($result))
+            return $this->response("验证码已失效，请尝试重新发送。", 403);
+        else if(!$result) {
+            return $this->response("验证码不正确。", 400);
+        }
+
+        if(!array_key_exists("deviceId", $info) || !array_key_exists("other", $info))
+            return $this->response("无效的客户端。",Response::HTTP_BAD_REQUEST);
 
         try {
             $ticket = new Ticket(
                 $vote,
                 $this->getUser(),
-                $request->request->get("choices"),
+                $info["choices"],
                 ($request->headers->get("X-Forwarded-For") ?? "") . "|" . $request->getClientIp() ,
                 $request->headers->get("user-agent"),
-                $request->request->get("deviceId"),
-                $request->request->get("other"));
+                $info["deviceId"],
+                $info["other"]);
 
             $em->persist($ticket);
             $em->flush();

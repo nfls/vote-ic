@@ -75,23 +75,23 @@ class Ticket implements \JsonSerializable
     public function  __construct(Vote $vote, User $user, $input, string $ip, string $userAgent, string $deviceId, array $other)
     {
         if(!is_array($input))
-            throw new \InvalidArgumentException("Invalid input.");
+            throw new \InvalidArgumentException("表格信息不完整。");
 
         $choices = [];
 
         foreach($vote->getSections() as $section) {
             /** @var $section Section */
             if (!array_key_exists($section->getId(), $input))
-                throw new \InvalidArgumentException("Invalid input.");
+                throw new \InvalidArgumentException("表格信息不完整。");
             $choiceId = $input[$section->getId()];
             if (is_null($choiceId))
-                throw new \InvalidArgumentException("Invalid input.");
+                throw new \InvalidArgumentException("表格信息不完整。");
             $userChoice = array_values(array_filter($section->getChoices()->toArray(), function($choice) use($choiceId) {
                 /** @var $choice Choice */
                 return $choice->getId() == $choiceId;
             }));
             if (count($userChoice) != 1)
-                throw new \InvalidArgumentException("Invalid input.");
+                throw new \InvalidArgumentException("表格信息不完整。");
             array_push($choices, $userChoice[0]);
         }
 
