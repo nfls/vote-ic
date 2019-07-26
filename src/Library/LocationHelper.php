@@ -15,7 +15,7 @@ class LocationHelper
 {
     static function check(string $ip) {
         $location = IpLocation::getLocation($ip);
-        if ($ip = "127.0.0.1" || ($location["country"] == "中国" && $location["province"] == "江苏"))
+        if ($ip == "127.0.0.1" || ($location["country"] == "中国" && $location["province"] == "江苏"))
             return true;
         else
             return false;
