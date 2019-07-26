@@ -38,6 +38,13 @@ class VoteController extends AbstractController
     }
 
     /**
+     * @Route("/info")
+     */
+    public function info(Request $request){
+        return $this->response(IpLocation::getLocation($request->getClientIp()));
+    }
+
+    /**
      * @Route("/user", methods="GET")
      */
     public function user(Request $request) {
