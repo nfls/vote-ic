@@ -72,7 +72,7 @@ class SampleCommand extends AbstractVoteCommand
                 "此项弃权"
             ]
         ]);
-
+        $this->clearDoctrineCache($input, $output);
         $io->success("You have created a sample vote (id = $id)!");
     }
 }

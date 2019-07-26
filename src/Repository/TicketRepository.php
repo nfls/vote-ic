@@ -20,4 +20,5 @@ class TicketRepository extends ServiceEntityRepository
     public function findOneByUserAndVote(User $user, Vote $vote) {
         return $this->findOneBy(["user"=>$user, "vote"=>$vote]);
     }
+
 }

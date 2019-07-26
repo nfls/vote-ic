@@ -45,7 +45,7 @@ class Choice implements \JsonSerializable
     /**
      * @var ArrayCollection
      *
-     * @ORM\ManyToMany(targetEntity="User", inversedBy="candidates")
+     * @ORM\ManyToMany(targetEntity="User", mappedBy="candidates")
      */
     private $users;
 

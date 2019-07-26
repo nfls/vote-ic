@@ -32,6 +32,8 @@ class AssociateCommand extends AbstractVoteCommand
 
         $this->voteManagerService->associate($username, $choice, $add);
 
+        $this->clearDoctrineCache($input, $output);
+
         $io->success("User $username is ".($add?"now":"no longer") . " associated with choice $choice");
     }
 }

@@ -22,6 +22,8 @@ class VoteRepository extends ServiceEntityRepository
         return $qb
             ->where($qb->expr()->in("u.status", [VoteStatus::PREVIEWING, VoteStatus::VOTING, VoteStatus::RESULTS_RELEASED]))
             ->getQuery()
+            ->useQueryCache(true)
+            ->useResultCache(true)
             ->getResult();
     }
 }

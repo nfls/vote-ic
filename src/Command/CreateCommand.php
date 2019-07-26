@@ -31,7 +31,7 @@ class CreateCommand extends AbstractVoteCommand
         $config = json_decode($input->getArgument('config'), true);
 
         $id = $this->voteManagerService->create($name, $config);
-
+        $this->clearDoctrineCache($input, $output);
         $io->success("You have created a new vote (id = $id)!");
     }
 }

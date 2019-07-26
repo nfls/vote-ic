@@ -30,7 +30,7 @@ class ResultCommand extends AbstractVoteCommand
         $id = $input->getArgument('id');
 
         $this->voteManagerService->calculate($id);
-
+        $this->clearDoctrineCache($input, $output);
         if($input->getArgument("detail") != null) {
             $result = $this->voteManagerService->result($id, true);
             foreach ($result->toArray() as $section) {

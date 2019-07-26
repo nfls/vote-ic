@@ -31,6 +31,8 @@ class ChoiceRepository extends ServiceEntityRepository
             //->andWhere("p.id = :id")
             ->setParameter("vote", $vote)
             ->getQuery()
+            ->useQueryCache(true)
+            ->useResultCache(true)
             ->getOneOrNullResult();
     }
 
