@@ -83,7 +83,7 @@ class SMService
             return false;
         $current ++;
         $this->redis->set($this->getLimitKey($ip), $current);
-        $this->redis->expire($this->getLimitKey($ip), 60);
+        $this->redis->expire($this->getLimitKey($ip), 120);
         $current = (int)$this->redis->get($this->getLimitKey($user->getPhone()));
         if($current >= 1)
             return false;

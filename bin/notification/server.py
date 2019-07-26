@@ -4,7 +4,7 @@ import requests
 from aliyunsms import AliyunSMS
 import config
 import json
-import submail
+from submail import submail
 
 app = Celery('notification', broker="redis://127.0.0.1", backend="redis://127.0.0.1")
 

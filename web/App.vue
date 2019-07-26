@@ -11,7 +11,7 @@
                             <v-card-title>登录</v-card-title>
                             <v-divider></v-divider>
                             <v-card-text>
-                                请不要反复登录，每个手机号每小时最多接收5条验证码。
+                                请不要反复发送验证码，否则您的IP将被封禁。
                                 <v-form>
                                     <v-text-field prepend-icon="person" name="name" label="中文名" v-model="form.name"
                                                   type="text" :error-messages="error.user"></v-text-field>
@@ -31,6 +31,7 @@
                             <v-card-title>登录</v-card-title>
                             <v-divider></v-divider>
                             <v-card-text>
+                                请将前半部分和后半部分一起输入，共6位数。
                                 <v-form>
                                     <v-text-field prepend-icon="lock" name="code" label="验证码" type="text"
                                                   v-model="form.code" :error-messages="error.code"></v-text-field>
@@ -50,7 +51,7 @@
                             <v-card-title>提交确认</v-card-title>
                             <v-divider></v-divider>
                             <v-card-text>
-                                请输入您收到的手机验证码，确认提交投票。
+                                请输入您收到的6位数手机验证码，确认提交投票。
                                 <v-form>
                                     <v-text-field name="code" label="验证码" type="text" v-model="form.confirmCode"
                                                   :error-messages="error.confirm"></v-text-field>
