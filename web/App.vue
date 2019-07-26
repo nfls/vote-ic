@@ -11,13 +11,17 @@
                             <v-card-title>登录</v-card-title>
                             <v-divider></v-divider>
                             <v-card-text>
-                                请不要反复发送验证码，否则您的IP将被封禁。
+
                                 <v-form>
                                     <v-text-field prepend-icon="person" name="name" label="中文名" v-model="form.name"
                                                   type="text" :error-messages="error.user"></v-text-field>
                                     <v-text-field prepend-icon="phone" name="phone" label="手机号" v-model="form.phone"
                                                   type="text" :error-messages="error.user"></v-text-field>
                                 </v-form>
+                                <div class="font-weight-bold">
+                                    代投、刷票等行为将导致选票作废。<br/>
+                                请不要反复发送验证码，否则您的IP将被封禁。<br/></div>
+                                您与本站的通讯使用国际标准的加密协议。在投票时，我们会收集关于您设备的信息，用于分析作弊行为。收集的信息将不会与任何第三方分享，也不会被用于任何营销行为，并将在投票结束后销毁。
                             </v-card-text>
                             <v-card-actions>
                                 <v-spacer></v-spacer>
@@ -87,6 +91,16 @@
                             <v-divider></v-divider>
                             <v-card-text>
                                 您所在的地区无法投票。请尝试关闭任何VPN后再试。
+                            </v-card-text>
+                        </v-card>
+                    </v-dialog>
+
+                    <v-dialog v-model="control.showAdBlockDialog" :persistent="true" width="500">
+                        <v-card>
+                            <v-card-title>错误</v-card-title>
+                            <v-divider></v-divider>
+                            <v-card-text>
+                                为了保证投票公平，请关闭任何广告拦截插件后再试。
                             </v-card-text>
                         </v-card>
                     </v-dialog>
@@ -209,7 +223,8 @@
                 showConfirmDialog: false,
                 showSnackBar: false,
                 showSuccessDialog: false,
-                showUnavailableDialog: false
+                showUnavailableDialog: false,
+                showAdBlockDialog: false
             },
             form: {
                 name: "",
@@ -408,7 +423,17 @@
             }
         },
         mounted() {
-            this.init()
+            let Fingerprint2 = require('fingerprintjs2')
+            Fingerprint2.get((components) => {
+                let adblock = components.filter((item)=>{
+                    return item["key"] === "adBlock"
+                })
+                if (adblock.length > 0 && adblock[0]["value"]) {
+                    this.control.showAdBlockDialog = true
+                } else {
+                    this.init()
+                }
+            })
         },
         props: {
             source: String
