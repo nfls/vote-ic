@@ -79,17 +79,17 @@ class SMService
 
     private function canSend(User $user, string $ip) {
         $current = (int)$this->redis->get($this->getLimitKey($ip));
-        if($current >= 5)
+        if($current >= 10)
             return false;
         $current ++;
         $this->redis->set($this->getLimitKey($ip), $current);
-        $this->redis->expire($this->getLimitKey($ip), 120);
+        $this->redis->expire($this->getLimitKey($ip), 600);
         $current = (int)$this->redis->get($this->getLimitKey($user->getPhone()));
         if($current >= 1)
             return false;
         $current ++;
         $this->redis->set($this->getLimitKey($user->getPhone()), $current);
-        $this->redis->expire($this->getLimitKey($user->getPhone()), 30);
+        $this->redis->expire($this->getLimitKey($user->getPhone()), 60);
         return true;
     }
 
