@@ -5,18 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="renderer" content="webkit" />
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:400,500,700,400italic|Material+Icons">
     <link rel="stylesheet" href="{{ asset('build/app.css') }}">
     <title>投票系统</title>
 </head>
 <body>
 <div id="app">
-    系统要求：<br/>
-    iOS >= 11, <br/>
-    Firefox >= 55 <br/>
-    Chrome >= 60, <br/>
-    如果您卡在本页面，请考虑升级您的浏览器，或联系改选委。
+    <h2>投票系统加载中。如果一直卡在本页面，请考虑升级您的浏览器，或联系相关负责人。</h2>
+    <strong>国产浏览器请使用极速模式。</strong>
+    <h3>系统最低要求：</h3>
+    iOS >= 10 <br/>
+    Firefox >= 40 <br/>
+    Chrome >= 48 <br/>
+    <h3>推荐配置：</h3>
+    iOS用户： iOS 12 <br/>
+    Windows / Android 用户： 最新版 Chrome <br/><br/>
+    <code id="ua"></code>
 </div>
+<script>
+    document.getElementById('ua').innerHTML = navigator.userAgent;
+</script>
 <script src="{{ asset('build/app.js') }}"></script>
 </body>
 </html>

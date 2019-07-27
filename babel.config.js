@@ -6,9 +6,9 @@ module.exports = function (api) {
         corejs: 3,
         //debug: true,
         targets: {
-            "chrome": "50",
+            "chrome": "40",
             "safari": "9",
-            "firefox": "50",
+            "firefox": "40",
             "esmodules": true
         }}]];
     const plugins = ["@babel/plugin-proposal-object-rest-spread", "@babel/plugin-transform-destructuring", "@babel/plugin-transform-spread" ];
