@@ -70,7 +70,7 @@ class VoteManagerService
     public function retrieve(string $id): Vote {
         $vote = $this->objectManager->getRepository(Vote::class)->find($id);
         if (is_null($vote))
-            throw new \Exception("Vote cannot be found");
+            throw new \InvalidArgumentException("Vote cannot be found");
         return $vote;
     }
 
