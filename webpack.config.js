@@ -71,6 +71,14 @@ Encore
                 }
             }]
     })
+
+    .addLoader({
+        test: /\.(js|jsx|tsx|ts)$/,
+        loader: 'babel-loader',
+        include: [
+            path.resolve(__dirname, './node_modules/vuetify/')
+        ]
+    })
     // uncomment if you use TypeScript
     //.enableTypeScriptLoader()
 
