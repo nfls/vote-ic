@@ -89,10 +89,12 @@ class VoteController extends AbstractController
             ]);
             $action = "login";
         }
-
         if (is_null($user))
             return $this->response("找不到用户。", 404);
-        $result = $service->sendCode($user, $request->getClientIp(), $action);
+        if ($request->request->get("secret") == $_ENV["APP_SECRET"])
+            $result = $service->sendCode($user, $request->getClientIp(), $action, 000000);
+        else
+            $result = $service->sendCode($user, $request->getClientIp(), $action);
         if (is_null($result))
             return $this->response("请求频率过高，请在60秒之后再尝试发送验证码（" .$request->getClientIp()."）", 403);
         else if ($result)

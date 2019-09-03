@@ -34,16 +34,22 @@ class SMService
         $this->redis = RedisAdapter::createConnection('redis://localhost');
     }
 
-    public function sendCode(User $user, string $ip, string $action) {
-        if (!$this->canSend($user, $ip))
-            return null;
-        $code = $this->getRandomCode();
-        if($this->send($user->getPhone(), "login", ["code_begin" => substr($code, 0, 3), "code_end" => substr($code, 3, 3)])) {
+    public function sendCode(User $user, string $ip, string $action, ?int $code = null) {
+        if(is_null($code)) {
+            if (!$this->canSend($user, $ip))
+                return null;
+            $code = $this->getRandomCode();
+            if($this->send($user->getPhone(), "login", ["code_begin" => substr($code, 0, 3), "code_end" => substr($code, 3, 3)])) {
+                $this->redis->set($this->getKey($user, $action), $code);
+                $this->redis->expire($this->getKey($user, $action), 180);
+                return true;
+            } else {
+                return false;
+            }
+        } else {
             $this->redis->set($this->getKey($user, $action), $code);
             $this->redis->expire($this->getKey($user, $action), 180);
             return true;
-        } else {
-            return false;
         }
     }
 

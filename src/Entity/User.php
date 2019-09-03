@@ -43,12 +43,7 @@ class User implements UserInterface, \JsonSerializable
      * @ORM\Column(type="text")
      */
     private $identifier;
-
-    /**
-     * @ORM\Column(type="boolean")
-     */
-
-    private $admin = false;
+    
     /**
      * @return int|null
      */

@@ -20,7 +20,10 @@
                                 </v-form>
                                 <div class="font-weight-bold">
                                     代投、刷票等行为将导致选票作废。<br/>
-                                请不要反复发送验证码，否则您的IP将会被封禁。<br/></div>
+                                    账户问题请联系改选委修改相关信息。<br/>
+                                    请不要反复发送验证码，否则您的IP将会被封禁。
+                                    <br/>
+                                </div>
                                 您与本站的通讯使用国际标准的加密协议。
                                 在投票时，我们会收集关于您设备的信息，用于分析作弊行为。
                                 收集的信息将严格保密，不会用于营销或出售给第三方，并将在投票结束后销毁。
@@ -46,7 +49,7 @@
 
                             <v-card-actions>
                                 <v-spacer></v-spacer>
-                                <v-btn color="secondary" @click="init" :disabled="loading">取消</v-btn>
+                                <!--<v-btn color="secondary" @click="init" :disabled="loading">取消</v-btn>-->
                                 <v-btn color="primary" @click="login" :disabled="loading" style="margin-right: 7px;">登录</v-btn>
                             </v-card-actions>
                         </v-card>
@@ -143,7 +146,7 @@
                         <v-card-text>
                             <v-layout>
                                 <v-flex>
-                                    <v-form v-if="vote != null">
+                                    <v-form v-if="vote != null" ref="form">
                                         <v-alert v-if="vote.status === 1" type="error">
                                             现在无法投票。
                                         </v-alert>
@@ -158,7 +161,7 @@
                                         </v-alert>
                                         <div v-for="section in vote.sections" :key="section.id">
                                             <header> {{ section.name }}</header>
-                                            <v-radio-group v-model="choices[section.id]" row :disabled="vote.status !== 2 || voted" required>
+                                            <v-radio-group v-model="choices[section.id]" row :disabled="vote.status !== 2 || voted" required :rules="rules">
                                                 <v-radio v-for="choice in section.choices"
                                                          :key="choice.id"
                                                          :value="choice.id"
@@ -213,7 +216,7 @@
         </v-content>
         <v-footer class="font-weight-medium">
             <v-flex text-center xs12>
-                {{ new Date().getFullYear() }} — <strong>Innovation Club</strong>
+                2019 — <strong>Innovation Club. <a href="https://github.com/nfls/root" style="text-decoration: none;" target="_blank">Source Code</a></strong>
             </v-flex>
         </v-footer>
     </v-app>
@@ -252,7 +255,10 @@
             content: "",
             column: null,
             choices: {},
-            user: null
+            user: null,
+            rules: [
+                v => !!v || '此项必填。'
+            ],
         }),
         methods: {
             init() {
@@ -336,6 +342,12 @@
                 })
             },
             sendConfirm() {
+                if (!this.$refs.form.validate()) {
+                    this.error.common = "表格尚未完整填写，请检查红色表示的项目。"
+                    this.control.showSnackBar = true
+                    return
+                }
+                this.form.confirmCode = ""
                 this.loading = true
                 this.error.confirm = ""
                 this.form.code = ""
