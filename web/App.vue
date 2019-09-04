@@ -131,7 +131,7 @@
                             <v-spacer></v-spacer>
                             <v-btn color="warning" outlined @click="logout" :disabled="loading">退出</v-btn>
                             <v-btn color="info" outlined @click="query">查票</v-btn>
-                            <v-btn color="secondary" outlined @click="load" :disabled="loading" style="margin-right: 8px;">刷新</v-btn>
+                            <v-btn color="secondary" outlined @click="init" :disabled="loading" style="margin-right: 8px;">刷新</v-btn>
                         </v-card-actions>
                     </v-card>
 
@@ -331,6 +331,7 @@
             },
             load() {
                 this.loading = true
+                this.choices = {}
                 this.axios.get("/current").then((response) => {
                     this.vote = response.data["data"]
                     var md = require('markdown-it')()
