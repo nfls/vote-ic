@@ -159,8 +159,8 @@
                                         <v-alert v-if="voted" type="success">
                                             您已成功提交您的选票。
                                         </v-alert>
-                                        <div v-for="section in vote.sections" :key="section.id">
-                                            <header> {{ section.name }}</header>
+                                        <div v-for="section in vote.sections" :key="section.id" style="margin-bottom: 10px;">
+                                            <div class="font-weight-bold" style="margin-bottom: -10px;">{{ section.name }}</div>
                                             <v-radio-group v-model="choices[section.id]" row :disabled="vote.status !== 2 || voted" required :rules="rules">
                                                 <v-radio v-for="choice in section.choices"
                                                          :key="choice.id"
