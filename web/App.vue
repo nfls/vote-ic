@@ -275,6 +275,9 @@
                     code: "",
                     confirm: "",
                 }
+                this.rules = [
+                    v => !!v || '此项必填。'
+                ]
                 this.voted = false
                 this.axios.get("/user").then((response) => {
                     this.control.showLoginDialog = false;
