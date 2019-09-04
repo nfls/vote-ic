@@ -1,15 +1,18 @@
 doctrine:
     orm:
         auto_generate_proxy_classes: false
-        metadata_cache_driver:
-            type: service
-            id: doctrine.system_cache_provider
-        query_cache_driver:
-            type: service
-            id: doctrine.system_cache_provider
         result_cache_driver:
-            type: service
-            id: doctrine.result_cache_provider
+            type: predis
+            host: localhost
+            port: 6379
+        query_cache_driver:
+            type: predis
+            host: localhost
+            port: 6379
+        metadata_cache_driver:
+            type: predis
+            host: localhost
+            port: 6379
 
 services:
     doctrine.result_cache_provider:

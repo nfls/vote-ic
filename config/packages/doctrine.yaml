@@ -13,18 +13,6 @@ doctrine:
         auto_generate_proxy_classes: true
         naming_strategy: doctrine.orm.naming_strategy.underscore
         auto_mapping: true
-        result_cache_driver:
-            type: predis
-            host: localhost
-            port: 6379
-        query_cache_driver:
-            type: predis
-            host: localhost
-            port: 6379
-        metadata_cache_driver:
-            type: predis
-            host: localhost
-            port: 6379
         mappings:
             App:
                 is_bundle: false

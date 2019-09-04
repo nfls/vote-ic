@@ -13,7 +13,6 @@ class User implements UserInterface, \JsonSerializable
 {
 
     const ROLE_USER = "ROLE_USER";
-    const ROLE_ADMIN = "ROLE_ADMIN";
 
     public function __construct(string $phone, string $identifier, int $role)
     {
@@ -88,10 +87,7 @@ class User implements UserInterface, \JsonSerializable
      */
     public function getRoles()
     {
-        if ($this->admin)
-            return [self::ROLE_ADMIN, self::ROLE_USER];
-        else
-            return [self::ROLE_USER];
+        return [self::ROLE_USER];
     }
 
     /**

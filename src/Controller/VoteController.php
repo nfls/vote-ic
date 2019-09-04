@@ -96,7 +96,7 @@ class VoteController extends AbstractController
         else
             $result = $service->sendCode($user, $request->getClientIp(), $action);
         if (is_null($result))
-            return $this->response("请求频率过高，请在60秒之后再尝试发送验证码（" .$request->getClientIp()."）", 403);
+            return $this->response("请求频率过高，请在60秒之后再试（" .$request->getClientIp()."）", 403);
         else if ($result)
             return $this->response("发送成功。");
         else
