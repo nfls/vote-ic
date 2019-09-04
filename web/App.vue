@@ -304,7 +304,7 @@
                     if (error.response) {
                         this.error.user = error.response.data["data"]
                     } else {
-                        this.error.code = "网络错误。"
+                        this.error.code = "网络错误，请刷新页面再试。"
                     }
                     this.loading = false
                 })
@@ -324,7 +324,7 @@
                     if (error.response) {
                         this.error.code = error.response.data["data"]
                     } else {
-                        this.error.code = "网络错误。"
+                        this.error.code = "网络错误，请刷新页面再试。"
                     }
                     this.loading = false
                 })
@@ -364,7 +364,7 @@
                         this.error.common = error.response.data["data"]
                         this.control.showSnackBar = true
                     } else {
-                        this.error.common = "网络错误。"
+                        this.error.common = "网络错误，请刷新页面再试。"
                         this.control.showSnackBar = true
                     }
                     this.loading = false
@@ -426,7 +426,7 @@
                         if (error.response) {
                             this.error.confirm = error.response.data["data"]
                         } else {
-                            this.error.confirm = "网络错误"
+                            this.error.confirm = "网络错误，请刷新页面再试。"
                         }
                         this.loading = false
                     })
