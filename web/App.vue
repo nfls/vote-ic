@@ -12,7 +12,7 @@
                             <v-divider></v-divider>
                             <v-card-text>
 
-                                <v-form>
+                                <v-form v-on:submit.prevent>
                                     <v-text-field prepend-icon="person" name="name" label="中文名" v-model="form.name"
                                                   type="text" :error-messages="error.user"></v-text-field>
                                     <v-text-field prepend-icon="phone" name="phone" label="手机号" v-model="form.phone"
@@ -41,7 +41,7 @@
                             <v-divider></v-divider>
                             <v-card-text>
                                 请将前半部分和后半部分一起输入，共6位数。
-                                <v-form>
+                                <v-form v-on:submit.prevent>
                                     <v-text-field prepend-icon="lock" name="code" label="验证码" type="text"
                                                   v-model="form.code" :error-messages="error.code"></v-text-field>
                                 </v-form>
@@ -61,7 +61,7 @@
                             <v-divider></v-divider>
                             <v-card-text>
                                 请输入您收到的6位数手机验证码，确认提交投票。
-                                <v-form>
+                                <v-form v-on:submit.prevent>
                                     <v-text-field name="code" label="验证码" type="text" v-model="form.confirmCode"
                                                   :error-messages="error.confirm"></v-text-field>
                                 </v-form>
@@ -146,7 +146,7 @@
                         <v-card-text>
                             <v-layout>
                                 <v-flex>
-                                    <v-form v-if="vote != null" ref="form">
+                                    <v-form v-if="vote != null" ref="form" v-on:submit.prevent>
                                         <v-alert v-if="vote.status === 1" type="error">
                                             现在无法投票。
                                         </v-alert>
@@ -175,7 +175,6 @@
                                     <v-alert v-else type="error">
                                         当前暂无投票。
                                     </v-alert>
-
                                 </v-flex>
                             </v-layout>
                         </v-card-text>
@@ -421,6 +420,7 @@
                     }).then((response) => {
                         this.control.showConfirmDialog = false
                         this.control.showSuccessDialog = true
+                        this.rules = []
                         this.load()
                     }).catch((error)=>{
                         if (error.response) {
