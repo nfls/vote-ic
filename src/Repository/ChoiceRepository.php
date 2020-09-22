@@ -6,7 +6,7 @@ use App\Entity\Choice;
 use App\Entity\User;
 use App\Entity\Vote;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method Choice|null find($id, $lockMode = null, $lockVersion = null)
@@ -16,7 +16,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class ChoiceRepository extends ServiceEntityRepository
 {
-    public function __construct(RegistryInterface $registry)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Choice::class);
     }

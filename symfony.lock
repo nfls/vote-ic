@@ -87,9 +87,6 @@
     "egulias/email-validator": {
         "version": "2.1.8"
     },
-    "fig/link-util": {
-        "version": "1.0.0"
-    },
     "guzzlehttp/promises": {
         "version": "v1.3.1"
     },
@@ -120,10 +117,10 @@
     "ocramius/proxy-manager": {
         "version": "2.1.1"
     },
-    "php-http/client-common": {
-        "version": "2.0.0"
+    "php": {
+        "version": "7.4"
     },
-    "php-http/curl-client": {
+    "php-http/client-common": {
         "version": "2.0.0"
     },
     "php-http/discovery": {
@@ -291,6 +288,9 @@
     },
     "symfony/dotenv": {
         "version": "v4.3.1"
+    },
+    "symfony/error-handler": {
+        "version": "v4.4.13"
     },
     "symfony/event-dispatcher": {
         "version": "v4.3.1"

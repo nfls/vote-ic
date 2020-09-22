@@ -4,7 +4,7 @@ use App\Entity\Ticket;
 use App\Entity\Vote;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Persistence\ManagerRegistry;
 /**
  * @method Ticket|null find($id, $lockMode = null, $lockVersion = null)
  * @method Ticket|null findOneBy(array $criteria, array $orderBy = null)
@@ -13,7 +13,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class TicketRepository extends ServiceEntityRepository
 {
-    public function __construct(RegistryInterface $registry)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Ticket::class);
     }

@@ -3,7 +3,7 @@ namespace App\Repository;
 use App\Entity\Vote;
 use App\Library\VoteStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Persistence\ManagerRegistry;
 /**
  * @method Vote|null find($id, $lockMode = null, $lockVersion = null)
  * @method Vote|null findOneBy(array $criteria, array $orderBy = null)
@@ -12,7 +12,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class VoteRepository extends ServiceEntityRepository
 {
-    public function __construct(RegistryInterface $registry)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Vote::class);
     }

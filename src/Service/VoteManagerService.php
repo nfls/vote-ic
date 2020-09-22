@@ -15,13 +15,13 @@ use App\Entity\Ticket;
 use App\Entity\User;
 use App\Entity\Vote;
 use App\Library\VoteStatus;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 class VoteManagerService
 {
     private $objectManager;
 
-    public function __construct(ObjectManager $objectManager)
+    public function __construct(EntityManagerInterface $objectManager)
     {
         $this->objectManager = $objectManager;
     }
