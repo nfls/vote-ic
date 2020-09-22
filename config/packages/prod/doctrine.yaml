@@ -2,17 +2,14 @@ doctrine:
     orm:
         auto_generate_proxy_classes: false
         result_cache_driver:
-            type: predis
-            host: localhost
-            port: 6379
+            type: pool
+            pool: cache.redis
         query_cache_driver:
-            type: predis
-            host: localhost
-            port: 6379
+            type: pool
+            pool: cache.redis
         metadata_cache_driver:
-            type: predis
-            host: localhost
-            port: 6379
+            type: pool
+            pool: cache.redis
 
 services:
     doctrine.result_cache_provider:
