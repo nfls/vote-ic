@@ -9,9 +9,8 @@
                     <v-dialog v-model="control.showLoginDialog" :persistent="true" width="500">
                         <v-card>
                             <v-card-title>登录</v-card-title>
-                            <v-divider></v-divider>
+                            <v-divider style="margin-bottom: 10px;"></v-divider>
                             <v-card-text>
-
                                 <v-form v-on:submit.prevent>
                                     <v-text-field prepend-icon="person" name="name" label="中文名" v-model="form.name"
                                                   type="text" :error-messages="error.user"></v-text-field>
@@ -30,7 +29,7 @@
                             </v-card-text>
                             <v-card-actions>
                                 <v-spacer></v-spacer>
-                                <v-btn color="primary" @click="sendCode" :disabled="loading" style="margin-right: 7px;">发送验证码</v-btn>
+                                <v-btn color="primary" @click="sendCode" :disabled="loading" style="margin-right: 16px;">发送验证码</v-btn>
                             </v-card-actions>
                         </v-card>
                     </v-dialog>
@@ -38,7 +37,7 @@
                     <v-dialog v-model="control.showCodeDialog" :persistent="true" width="500">
                         <v-card>
                             <v-card-title>登录</v-card-title>
-                            <v-divider></v-divider>
+                            <v-divider style="margin-bottom: 10px;"></v-divider>
                             <v-card-text>
                                 请将前半部分和后半部分一起输入，共6位数。
                                 <v-form v-on:submit.prevent>
@@ -50,7 +49,7 @@
                             <v-card-actions>
                                 <v-spacer></v-spacer>
                                 <!--<v-btn color="secondary" @click="init" :disabled="loading">取消</v-btn>-->
-                                <v-btn color="primary" @click="login" :disabled="loading" style="margin-right: 7px;">登录</v-btn>
+                                <v-btn color="primary" @click="login" :disabled="loading" style="margin-right: 16px;">登录</v-btn>
                             </v-card-actions>
                         </v-card>
                     </v-dialog>
@@ -58,7 +57,7 @@
                     <v-dialog v-model="control.showConfirmDialog" :persistent="true" width="500">
                         <v-card>
                             <v-card-title>提交确认</v-card-title>
-                            <v-divider></v-divider>
+                            <v-divider style="margin-bottom: 10px;"></v-divider>
                             <v-card-text>
                                 请输入您收到的6位数手机验证码，确认提交投票。
                                 <v-form v-on:submit.prevent>
@@ -71,7 +70,7 @@
                             <v-card-actions>
                                 <v-spacer></v-spacer>
                                 <v-btn color="secondary" @click="control.showConfirmDialog = false" :disabled="loading">取消</v-btn>
-                                <v-btn color="primary" @click="submit" :disabled="loading" style="margin-right: 7px;">提交</v-btn>
+                                <v-btn color="primary" @click="submit" :disabled="loading" style="margin-right: 16px;">提交</v-btn>
                             </v-card-actions>
                         </v-card>
                     </v-dialog>
@@ -79,14 +78,14 @@
                     <v-dialog v-model="control.showSuccessDialog" :persistent="true" width="500">
                         <v-card>
                             <v-card-title>投票成功</v-card-title>
-                            <v-divider></v-divider>
+                            <v-divider style="margin-bottom: 10px;"></v-divider>
                             <v-card-text>
                                 您已投票成功，填写内容已无法修改。您可以凭您短信中的流水号，查询您所提交的投票内容。
                             </v-card-text>
 
                             <v-card-actions>
                                 <v-spacer></v-spacer>
-                                <v-btn color="primary" @click="control.showSuccessDialog = false" style="margin-right: 7px;">好的</v-btn>
+                                <v-btn color="primary" @click="control.showSuccessDialog = false" style="margin-right: 16px;">好的</v-btn>
                             </v-card-actions>
                         </v-card>
                     </v-dialog>
@@ -94,7 +93,7 @@
                     <v-dialog v-model="control.showUnavailableDialog" :persistent="true" width="500">
                         <v-card>
                             <v-card-title>错误</v-card-title>
-                            <v-divider></v-divider>
+                            <v-divider style="margin-bottom: 10px;"></v-divider>
                             <v-card-text>
                                 您所在的地区无法投票。请尝试关闭任何VPN后再试。
                             </v-card-text>
@@ -104,7 +103,7 @@
                     <v-dialog v-model="control.showAdBlockDialog" :persistent="true" width="500">
                         <v-card>
                             <v-card-title>错误</v-card-title>
-                            <v-divider></v-divider>
+                            <v-divider style="margin-bottom: 10px;"></v-divider>
                             <v-card-text>
                                 为了保证投票公平，请关闭任何广告拦截插件后再试。
                             </v-card-text>
@@ -215,7 +214,7 @@
         </v-content>
         <v-footer class="font-weight-medium">
             <v-flex text-center xs12>
-                2019 — <strong>Innovation Club. <a href="https://github.com/nfls/root" style="text-decoration: none;" target="_blank">Source Code</a></strong>
+                2020 — <strong>Innovation Club. <a href="https://github.com/nfls/root" style="text-decoration: none;" target="_blank">Source Code</a></strong>
             </v-flex>
         </v-footer>
     </v-app>
@@ -488,3 +487,9 @@
         }
     }
 </script>
+
+<style>
+    v-card-text {
+
+    }
+</style>
