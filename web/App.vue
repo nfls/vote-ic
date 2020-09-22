@@ -20,7 +20,7 @@
                                 </v-form>
                                 <div class="font-weight-bold">
                                     代投、刷票等行为将导致选票作废。<br/>
-                                    账户问题请联系改选委修改相关信息。<br/>
+                                    如有问题请联系 A2-1 周博洋 或 DP1-2 朱孝缘。<br/>
                                     请不要反复发送验证码，否则您的IP将会被封禁。
                                     <br/>
                                 </div>
@@ -188,7 +188,7 @@
                         <v-card-title class="title" primary-title>结果</v-card-title>
                         <v-card-text>
                             <v-alert type="info" v-if="(mine || {}).result != null">
-                                您的原始票数为 <kbd>{{ mine.count}}</kbd> 票，改选委调整票数为 <kbd>{{ mine.adjust}}</kbd> 票，最终票数为 <kbd>{{ mine.result}}</kbd> 票。
+                                您的原始票数为 <kbd>{{ mine.count}}</kbd> 票，附加调整票数为 <kbd>{{ mine.adjust}}</kbd> 票，最终票数为 <kbd>{{ mine.result}}</kbd> 票。
                             </v-alert>
                             <div v-if="results != null">
                                 <header>以下是当选名单。有效票数共{{results.count}}张。</header>
