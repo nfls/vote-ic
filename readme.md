@@ -11,7 +11,8 @@
 8. 安装缓存数据库 ```redis```，用户名密码默认即可。
 9. 安装 ```python 3```。
 10. 安装 ```python``` 的包管理器 ```pip```。
-11. 进入```/bin/notification``` 目录下安装 ```pip install -r requirements.txt```。
+11. 进入```./bin/notification``` 目录下安装 ```pip install -r requirements.txt```。
+12. 在```config.py```中配置 Submail 的 API Key 及短信模板编号。
 
 ## 启动环境
 第一次安装，及调整数据库模型后需要执行 ```php bin/console doctrine:schema:update --force```。
