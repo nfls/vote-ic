@@ -373,7 +373,7 @@
                 })
             },
             submit() {
-                let Fingerprint2 = require('fingerprintjs2')
+                let Fingerprint2 = require('@fingerprintjs/fingerprintjs')
                 this.loading = true
                 Fingerprint2.get((components) => {
                     let results = {}
@@ -471,7 +471,7 @@
             }
         },
         mounted() {
-            let Fingerprint2 = require('fingerprintjs2')
+            let Fingerprint2 = require('@fingerprintjs/fingerprintjs')
             Fingerprint2.get((components) => {
                 let adblock = components.filter((item)=>{
                     return item["key"] === "adBlock"
