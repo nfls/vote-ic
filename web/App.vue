@@ -3,7 +3,7 @@
         <v-app-bar color="indigo" dark fixed app>
             <v-toolbar-title>{{ (vote || {}).title || "南外国际部投票系统" }}</v-toolbar-title>
         </v-app-bar>
-        <v-content>
+        <v-main>
             <v-container fluid fill-height>
                 <v-flex>
                     <v-dialog v-model="control.showLoginDialog" :persistent="true" width="500">
@@ -211,7 +211,7 @@
                     <v-snackbar v-model="control.showSnackBar"> {{error.common}} </v-snackbar>
                 </v-flex>
             </v-container>
-        </v-content>
+        </v-main>
         <v-footer class="font-weight-medium">
             <v-flex text-center xs12>
                 2020 — <strong>Innovation Club. <a href="https://github.com/nfls/root" style="text-decoration: none;" target="_blank">Source Code</a></strong>
