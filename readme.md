@@ -19,7 +19,7 @@
 其余情况，Windows 可运行 ```dev.bat``` 快速启动本地开发环境。Unix 系统可执行 ```php bin/console server:start``` 及 ``` ./node_modules/.bin/encore dev --watch``` 启动。
 
 # 服务器部署
- TODO
+参考 `prod.sh`。
 
 # 版本说明
 **为保证安全，每年投票前请升级前后端依赖包**
