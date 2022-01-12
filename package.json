@@ -29,7 +29,7 @@
         "deepmerge": "^4.2.2",
         "fibers": "^5.0.0",
         "@fingerprintjs/fingerprintjs": "^2.1.2",
-        "markdown-it": "^11.0.0",
+        "markdown-it": "^12.3.2",
         "regenerator-runtime": "^0.13.7",
         "sass": "^1.26.11",
         "sass-loader": "^7.1.0",
